@@ -53,7 +53,7 @@ JWT_SECRET=your-super-secure-jwt-secret-here-min-32-chars
 JWT_EXPIRES_IN=7d
 
 # CORS Configuration (will be updated after Vercel setup)
-CORS_ORIGINS=http://localhost:5173,https://your-vercel-domain.vercel.app
+CORS_ORIGINS=http://localhost:5173,https://grr-agents.vercel.app
 
 # Optional: MongoDB Database Name
 MONGODB_DATABASE_NAME=madplan
@@ -74,7 +74,7 @@ MONGODB_DATABASE_NAME=madplan
 
 ## Step 5: Verify Deployment
 
-Your backend will be available at: `https://madplan-backend.onrender.com`
+Your backend will be available at: `https://grr-agents.onrender.com`
 
 ### Health Check Endpoints
 
@@ -82,10 +82,10 @@ Test these endpoints to verify deployment:
 
 ```bash
 # Basic health check
-curl https://your-service-name.onrender.com/health
+curl https://grr-agents.onrender.com/health
 
 # GraphQL endpoint
-curl -X POST https://your-service-name.onrender.com/graphql \
+curl -X POST https://grr-agents.onrender.com/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "{ __schema { types { name } } }"}'
 ```
@@ -121,13 +121,13 @@ SSL certificates are automatically provisioned by Render for all web services. Y
 
 ```bash
 # Check service status
-curl -I https://your-service-name.onrender.com
+curl -I https://grr-agents.onrender.com
 
 # View live logs (from Render dashboard)
 # Navigate to your service > Logs tab
 
 # Test GraphQL endpoint
-curl -X POST https://your-service-name.onrender.com/graphql \
+curl -X POST https://grr-agents.onrender.com/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "query { __typename }"}'
 ```

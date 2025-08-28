@@ -141,7 +141,7 @@ jobs:
         run: |
           echo "Deploying backend to Render staging environment..."
           echo "Render will auto-deploy from main branch"
-          echo "Staging URL will be available at: https://madplan-backend-staging.onrender.com"
+          echo "Staging URL will be available at: https://grr-agents.onrender.com"
 
       - name: Verify staging deployment
         run: |
@@ -150,7 +150,7 @@ jobs:
           sleep 60
           # Run deployment health check
           if [ -f "scripts/test-deployment.js" ]; then
-            BACKEND_URL=https://madplan-backend-staging.onrender.com node scripts/test-deployment.js
+            BACKEND_URL=https://grr-agents.onrender.com node scripts/test-deployment.js
           else
             echo "No deployment test script found, skipping health check"
           fi
@@ -186,7 +186,7 @@ jobs:
         run: |
           echo "Deploying backend version ${{ steps.extract_version.outputs.RELEASE_VERSION }} to production..."
           echo "Render will auto-deploy from release tag"
-          echo "Production URL: https://madplan-backend.onrender.com"
+          echo "Production URL: https://grr-agents.onrender.com"
 
       - name: Verify production deployment
         run: |
@@ -195,7 +195,7 @@ jobs:
           sleep 120
           # Run deployment health check
           if [ -f "scripts/test-deployment.js" ]; then
-            BACKEND_URL=https://madplan-backend.onrender.com node scripts/test-deployment.js
+            BACKEND_URL=https://grr-agents.onrender.com node scripts/test-deployment.js
           else
             echo "No deployment test script found, skipping health check"
           fi

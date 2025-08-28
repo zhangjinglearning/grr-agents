@@ -198,14 +198,14 @@ npm install
 2. **Environment Variables**
    ```bash
    # Backend CORS_ORIGINS should include frontend domains
-   CORS_ORIGINS=https://madplan-frontend.vercel.app,https://staging-frontend.vercel.app
+   CORS_ORIGINS=https://grr-agents.vercel.app,https://grr-agents.vercel.app
    ```
 
 3. **Test CORS Manually**
    ```bash
-   curl -H "Origin: https://your-frontend.vercel.app" \
+   curl -H "Origin: https://grr-agents.vercel.app" \
         -H "Access-Control-Request-Method: POST" \
-        -X OPTIONS https://your-backend.onrender.com/graphql
+        -X OPTIONS https://grr-agents.onrender.com/graphql
    ```
 
 #### GraphQL Connection Issues
@@ -217,7 +217,7 @@ npm install
 1. **Verify GraphQL Endpoint**
    ```bash
    # Test GraphQL endpoint directly
-   curl -X POST https://your-backend.onrender.com/graphql \
+   curl -X POST https://grr-agents.onrender.com/graphql \
         -H "Content-Type: application/json" \
         -d '{"query": "{ __schema { types { name } } }"}'
    ```

@@ -16,12 +16,12 @@ const http = require('http');
 // Configuration
 const config = {
   backend: {
-    staging: process.env.BACKEND_STAGING_URL || 'https://madplan-backend-staging.onrender.com',
-    production: process.env.BACKEND_PRODUCTION_URL || 'https://madplan-backend.onrender.com'
+    staging: process.env.BACKEND_STAGING_URL || 'https://grr-agents.onrender.com',
+    production: process.env.BACKEND_PRODUCTION_URL || 'https://grr-agents.onrender.com'
   },
   frontend: {
-    staging: process.env.FRONTEND_STAGING_URL || 'https://madplan-frontend-staging.vercel.app',
-    production: process.env.FRONTEND_PRODUCTION_URL || 'https://madplan-frontend.vercel.app'
+    staging: process.env.FRONTEND_STAGING_URL || 'https://grr-agents.vercel.app',
+    production: process.env.FRONTEND_PRODUCTION_URL || 'https://grr-agents.vercel.app'
   },
   timeout: 30000,
   retries: 3

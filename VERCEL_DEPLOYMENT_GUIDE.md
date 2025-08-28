@@ -48,7 +48,7 @@ Configure these environment variables in the Vercel project settings:
 
 ```bash
 # GraphQL API Endpoint (replace with your Render backend URL)
-VITE_GRAPHQL_ENDPOINT=https://your-render-service.onrender.com/graphql
+VITE_GRAPHQL_ENDPOINT=https://grr-agents.onrender.com/graphql
 
 # Optional: Environment identifier
 VITE_NODE_ENV=production
@@ -66,7 +66,7 @@ VITE_APP_VERSION=1.0.0
 2. Click "Environment Variables" in the sidebar
 3. Add each variable:
    - **Name**: Variable name (e.g., `VITE_GRAPHQL_ENDPOINT`)
-   - **Value**: Variable value (e.g., `https://your-backend.onrender.com/graphql`)
+   - **Value**: Variable value (e.g., `https://grr-agents.onrender.com/graphql`)
    - **Environment**: Select "Production", "Preview", and "Development"
 4. Click "Save" for each variable
 
@@ -79,7 +79,7 @@ VITE_APP_VERSION=1.0.0
 ## Step 6: Configure Custom Domain (Optional)
 
 ### Using Vercel Domain
-Your app will be available at: `https://your-project-name.vercel.app`
+Your app will be available at: `https://grr-agents.vercel.app`
 
 ### Custom Domain Setup
 1. Go to "Settings" → "Domains" in your Vercel project
@@ -217,6 +217,6 @@ After successful frontend deployment:
 Ensure your backend (Render) is configured to accept requests from your Vercel domain:
 
 1. Update `CORS_ORIGINS` environment variable on Render
-2. Include your Vercel URL: `https://your-project.vercel.app`
+2. Include your Vercel URL: `https://grr-agents.vercel.app`
 3. Test API connectivity from deployed frontend
 4. Monitor both frontend and backend logs during testing

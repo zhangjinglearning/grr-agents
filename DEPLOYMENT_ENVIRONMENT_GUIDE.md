@@ -13,7 +13,7 @@ This guide covers environment variable setup for both Render (backend) and Verce
 | `PORT` | Application port | `10000` | Render assigns this automatically |
 | `JWT_SECRET` | JWT token signing key | `your-super-secure-32-char-secret` | Generate strong random string |
 | `JWT_EXPIRES_IN` | JWT token expiration | `7d` | Token validity period |
-| `CORS_ORIGINS` | Allowed frontend domains | `https://your-app.vercel.app` | Update after Vercel deployment |
+| `CORS_ORIGINS` | Allowed frontend domains | `https://grr-agents.vercel.app` | Update after Vercel deployment |
 
 ### Optional Variables
 
@@ -37,7 +37,7 @@ This guide covers environment variable setup for both Render (backend) and Verce
 
 | Variable | Description | Example Value | Notes |
 |----------|-------------|---------------|-------|
-| `VITE_GRAPHQL_ENDPOINT` | Backend GraphQL URL | `https://your-backend.onrender.com/graphql` | Update after Render deployment |
+| `VITE_GRAPHQL_ENDPOINT` | Backend GraphQL URL | `https://grr-agents.onrender.com/graphql` | Update after Render deployment |
 
 ### Optional Variables
 
@@ -84,7 +84,7 @@ Update CORS origins after deployment:
 
 ```bash
 # Example CORS_ORIGINS value after both deployments
-CORS_ORIGINS=https://madplan-frontend.vercel.app,https://www.yourdomain.com
+CORS_ORIGINS=https://grr-agents.vercel.app,https://www.yourdomain.com
 ```
 
 ## Deployment Sequence
@@ -110,7 +110,7 @@ Follow this sequence for proper environment configuration:
 
 ### Backend Health Check
 ```bash
-curl https://your-backend.onrender.com/api/health
+curl https://grr-agents.onrender.com/api/health
 ```
 
 Expected response:
@@ -127,7 +127,7 @@ Expected response:
 
 ### GraphQL Endpoint Test
 ```bash
-curl -X POST https://your-backend.onrender.com/graphql \
+curl -X POST https://grr-agents.onrender.com/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "{ __schema { types { name } } }"}'
 ```
@@ -164,9 +164,9 @@ curl -X POST https://your-backend.onrender.com/graphql \
 
 ### Health Check URLs
 
-- **Backend Health**: `https://your-backend.onrender.com/api/health`
-- **GraphQL Playground**: `https://your-backend.onrender.com/graphql` (development only)
-- **Frontend**: `https://your-frontend.vercel.app`
+- **Backend Health**: `https://grr-agents.onrender.com/api/health`
+- **GraphQL Playground**: `https://grr-agents.onrender.com/graphql` (development only)
+- **Frontend**: `https://grr-agents.vercel.app`
 
 ## Production Considerations
 

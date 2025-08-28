@@ -45,8 +45,8 @@ Configure the following secrets in your GitHub repository settings (`Settings > 
 **`VITE_GRAPHQL_ENDPOINT`**
 - **Description**: GraphQL API endpoint URL for connecting to backend
 - **Format**: `https://your-backend-domain.com/graphql`
-- **Production**: `https://madplan-backend.onrender.com/graphql`
-- **Staging**: `https://madplan-backend-staging.onrender.com/graphql`
+- **Production**: `https://grr-agents.onrender.com/graphql`
+- **Staging**: `https://grr-agents.onrender.com/graphql`
 
 **`VERCEL_TOKEN`**
 - **Description**: Vercel deployment token for automated deployments
@@ -62,11 +62,11 @@ Configure the following secrets in your GitHub repository settings (`Settings > 
 
 **`VITE_GRAPHQL_ENDPOINT_STAGING`**
 - **Description**: Staging environment GraphQL endpoint
-- **Format**: `https://madplan-backend-staging.onrender.com/graphql`
+- **Format**: `https://grr-agents.onrender.com/graphql`
 
 **`VITE_GRAPHQL_ENDPOINT_PRODUCTION`**
 - **Description**: Production environment GraphQL endpoint
-- **Format**: `https://madplan-backend.onrender.com/graphql`
+- **Format**: `https://grr-agents.onrender.com/graphql`
 
 ## Environment Variables Setup
 
@@ -87,7 +87,7 @@ NODE_ENV=production
 PORT=3000
 
 # CORS Configuration
-CORS_ORIGINS=https://madplan-frontend.vercel.app,https://your-custom-domain.com
+CORS_ORIGINS=https://grr-agents.vercel.app,https://your-custom-domain.com
 
 # Security
 BCRYPT_SALT_ROUNDS=12
@@ -111,7 +111,7 @@ NODE_ENV=staging
 PORT=3000
 
 # CORS Configuration
-CORS_ORIGINS=https://madplan-frontend-staging.vercel.app
+CORS_ORIGINS=https://grr-agents.vercel.app
 
 # Security
 BCRYPT_SALT_ROUNDS=10
@@ -125,7 +125,7 @@ LOG_LEVEL=debug
 #### Production Environment (`.env.production`)
 ```bash
 # API Configuration
-VITE_GRAPHQL_ENDPOINT=https://madplan-backend.onrender.com/graphql
+VITE_GRAPHQL_ENDPOINT=https://grr-agents.onrender.com/graphql
 
 # Application Configuration
 VITE_APP_TITLE=MadPlan
@@ -140,7 +140,7 @@ VITE_ENABLE_DEBUG=false
 #### Staging Environment (`.env.staging`)
 ```bash
 # API Configuration
-VITE_GRAPHQL_ENDPOINT=https://madplan-backend-staging.onrender.com/graphql
+VITE_GRAPHQL_ENDPOINT=https://grr-agents.onrender.com/graphql
 
 # Application Configuration
 VITE_APP_TITLE=MadPlan (Staging)

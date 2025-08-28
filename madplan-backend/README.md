@@ -2,7 +2,7 @@
 
 [![Backend CI/CD](https://github.com/USERNAME/REPO_NAME/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/REPO_NAME/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/USERNAME/REPO_NAME/branch/main/graph/badge.svg)](https://codecov.io/gh/USERNAME/REPO_NAME)
-[![Render Deployment](https://img.shields.io/badge/Render-Deployed-success)](https://madplan-backend.onrender.com/api/health)
+[![Render Deployment](https://img.shields.io/badge/Render-Deployed-success)](https://grr-agents.onrender.com/api/health)
 
 Backend API for the MadPlan Kanban board application built with Nest.js and MongoDB.
 
@@ -72,8 +72,8 @@ This project uses GitHub Actions for continuous integration and deployment:
 5. **Deployment**: Automated deployment to Render
 
 ### Deployment Status
-- **Staging**: [https://madplan-backend-staging.onrender.com](https://madplan-backend-staging.onrender.com/api/health)
-- **Production**: [https://madplan-backend.onrender.com](https://madplan-backend.onrender.com/api/health)
+- **Staging**: [https://grr-agents.onrender.com](https://grr-agents.onrender.com/api/health)
+- **Production**: [https://grr-agents.onrender.com](https://grr-agents.onrender.com/api/health)
 
 ## Development
 

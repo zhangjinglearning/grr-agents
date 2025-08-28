@@ -9,7 +9,7 @@ const https = require('https');
 const http = require('http');
 
 // Configuration
-const BACKEND_URL = process.env.BACKEND_URL || 'https://your-backend.onrender.com';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://grr-agents.onrender.com';
 const TIMEOUT = 30000; // 30 seconds
 
 console.log('🚀 Testing Deployment...');

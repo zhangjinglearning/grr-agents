@@ -103,7 +103,7 @@ npm run preview  # Test production build locally
 ```bash
 # Ensure all VITE_ prefixed variables are set in Vercel
 # Variables must be available at build time
-VITE_GRAPHQL_ENDPOINT=https://your-backend.onrender.com/graphql
+VITE_GRAPHQL_ENDPOINT=https://grr-agents.onrender.com/graphql
 ```
 
 **TypeScript Errors:**
@@ -151,20 +151,20 @@ npm run build -- --analyze  # If supported by build tool
 1. **Check Backend CORS Settings:**
 ```bash
 # Verify CORS_ORIGINS environment variable in Render
-CORS_ORIGINS=https://your-vercel-app.vercel.app,https://your-custom-domain.com
+CORS_ORIGINS=https://grr-agents.vercel.app,https://your-custom-domain.com
 ```
 
 2. **Check Frontend GraphQL Endpoint:**
 ```bash
 # Verify VITE_GRAPHQL_ENDPOINT in Vercel
-VITE_GRAPHQL_ENDPOINT=https://your-backend.onrender.com/graphql
+VITE_GRAPHQL_ENDPOINT=https://grr-agents.onrender.com/graphql
 ```
 
 3. **Test CORS Manually:**
 ```bash
-curl -H "Origin: https://your-vercel-app.vercel.app" \
+curl -H "Origin: https://grr-agents.vercel.app" \
      -H "Access-Control-Request-Method: POST" \
-     -X OPTIONS https://your-backend.onrender.com/graphql
+     -X OPTIONS https://grr-agents.onrender.com/graphql
 ```
 
 ### SSL and Security Issues
@@ -184,19 +184,19 @@ curl -H "Origin: https://your-vercel-app.vercel.app" \
 ```bash
 # Test backend deployment
 cd madplan-backend
-BACKEND_URL=https://your-backend.onrender.com npm run test:deployment
+BACKEND_URL=https://grr-agents.onrender.com npm run test:deployment
 ```
 
 ### Manual Testing Checklist
 
 **Backend Health Check:**
 ```bash
-curl https://your-backend.onrender.com/api/health
+curl https://grr-agents.onrender.com/api/health
 ```
 
 **GraphQL Endpoint Test:**
 ```bash
-curl -X POST https://your-backend.onrender.com/graphql \
+curl -X POST https://grr-agents.onrender.com/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "{ __schema { types { name } } }"}'
 ```

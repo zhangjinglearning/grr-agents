@@ -2,7 +2,7 @@
 
 [![Frontend CI/CD](https://github.com/USERNAME/REPO_NAME/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/REPO_NAME/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/USERNAME/REPO_NAME/branch/main/graph/badge.svg)](https://codecov.io/gh/USERNAME/REPO_NAME)
-[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-success)](https://madplan-frontend.vercel.app)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-success)](https://grr-agents.vercel.app)
 
 Studio Ghibli-inspired Kanban board frontend application built with Vue 3, TypeScript, and Tailwind CSS.
 
@@ -51,8 +51,8 @@ This project uses GitHub Actions for continuous integration and deployment:
 5. **Deployment**: Automated deployment to Vercel
 
 ### Deployment Status
-- **Staging**: [https://madplan-frontend-staging.vercel.app](https://madplan-frontend-staging.vercel.app)
-- **Production**: [https://madplan-frontend.vercel.app](https://madplan-frontend.vercel.app)
+- **Staging**: [https://grr-agents.vercel.app](https://grr-agents.vercel.app)
+- **Production**: [https://grr-agents.vercel.app](https://grr-agents.vercel.app)
 
 ## Development
 
@@ -139,8 +139,8 @@ madplan-frontend/
 
 This frontend connects to the MadPlan NestJS backend via GraphQL:
 - **Local Development**: `http://localhost:3000/graphql`
-- **Staging**: `https://madplan-backend-staging.onrender.com/graphql`
-- **Production**: `https://madplan-backend.onrender.com/graphql`
+- **Staging**: `https://grr-agents.onrender.com/graphql`
+- **Production**: `https://grr-agents.onrender.com/graphql`
 
 ### Design System
 
