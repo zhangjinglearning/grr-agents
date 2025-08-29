@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { UsersService } from './users.service';
 import { RegisterUserInput } from './dto/register-user.input';
+import { LoginUserInput } from './dto/login-user.input';
 import { AuthPayload } from './dto/auth-payload.dto';
 import { User } from './user.entity';
 
@@ -30,18 +31,17 @@ export class UsersResolver {
 
   /**
    * Login user with email and password
-   * @param email - User's email address
-   * @param password - User's password
+   * @param loginUserInput - User login credentials
    * @returns AuthPayload containing JWT token and user data
    */
   @Mutation(() => AuthPayload, {
     description: 'Login user with email and password',
   })
   async login(
-    @Args('email') email: string,
-    @Args('password') password: string,
+    @Args('input', new ValidationPipe({ transform: true }))
+    loginUserInput: LoginUserInput,
   ): Promise<AuthPayload> {
-    return this.authService.login(email, password);
+    return this.authService.login(loginUserInput.email, loginUserInput.password);
   }
 
   /**

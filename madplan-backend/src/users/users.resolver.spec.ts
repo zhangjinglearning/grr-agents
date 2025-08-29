@@ -4,6 +4,7 @@ import { UsersResolver } from './users.resolver';
 import { AuthService } from '../auth/auth.service';
 import { UsersService } from './users.service';
 import { RegisterUserInput } from './dto/register-user.input';
+import { LoginUserInput } from './dto/login-user.input';
 import { AuthPayload } from './dto/auth-payload.dto';
 import { User } from './user.entity';
 
@@ -27,6 +28,11 @@ describe('UsersResolver', () => {
   };
 
   const mockRegisterInput: RegisterUserInput = {
+    email: 'test@example.com',
+    password: 'Password123!',
+  };
+
+  const mockLoginInput: LoginUserInput = {
     email: 'test@example.com',
     password: 'Password123!',
   };
@@ -95,25 +101,27 @@ describe('UsersResolver', () => {
   describe('login', () => {
     it('should successfully login user', async () => {
       // Arrange
-      const email = 'test@example.com';
-      const password = 'Password123!';
       (authService.login as jest.Mock).mockResolvedValue(mockAuthPayload);
 
       // Act
-      const result = await resolver.login(email, password);
+      const result = await resolver.login(mockLoginInput);
 
       // Assert
       expect(result).toEqual(mockAuthPayload);
-      expect(authService.login).toHaveBeenCalledWith(email, password);
+      expect(authService.login).toHaveBeenCalledWith(mockLoginInput.email, mockLoginInput.password);
     });
 
     it('should propagate authentication errors', async () => {
       // Arrange
       const authError = new Error('Invalid credentials');
+      const invalidLoginInput: LoginUserInput = {
+        email: 'test@example.com',
+        password: 'wrongpassword',
+      };
       (authService.login as jest.Mock).mockRejectedValue(authError);
 
       // Act & Assert
-      await expect(resolver.login('test@example.com', 'wrongpassword'))
+      await expect(resolver.login(invalidLoginInput))
         .rejects
         .toThrow(authError);
     });
