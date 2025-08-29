@@ -6,6 +6,8 @@ import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AppResolver } from "./app.resolver";
+import { UsersModule } from "./users/users.module";
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
   imports: [
@@ -26,6 +28,10 @@ import { AppResolver } from "./app.resolver";
       playground: process.env.NODE_ENV !== "production",
       introspection: true,
     }),
+
+    // Feature modules
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],

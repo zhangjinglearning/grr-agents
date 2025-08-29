@@ -49,7 +49,7 @@ NODE_ENV=production
 PORT=10000
 
 # JWT Configuration (generate a secure random string)
-JWT_SECRET=your-super-secure-jwt-secret-here-min-32-chars
+JWT_SECRET=1c1f5b04ebe7a946271c598791fa7e93
 JWT_EXPIRES_IN=7d
 
 # CORS Configuration (will be updated after Vercel setup)
