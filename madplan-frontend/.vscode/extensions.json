@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "Vue.volar",
+    "Vue.vscode-typescript-vue-plugin",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-json",
+    "bradlc.vscode-tailwindcss",
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag",
+    "ms-vscode.vscode-typescript-next",
+    "ZixuanChen.vitest-explorer",
+    "ms-playwright.playwright",
+    "apollographql.vscode-apollo"
+  ]
+}

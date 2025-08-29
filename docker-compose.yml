@@ -1,0 +1,92 @@
+# MadPlan Local Development Docker Compose Configuration
+# This file sets up local MongoDB instance for development
+# Usage: docker-compose up -d to start services
+# Usage: docker-compose down to stop services
+
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:7.0
+    container_name: madplan-mongodb-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      # MongoDB root user credentials
+      MONGO_INITDB_ROOT_USERNAME: madplan_dev
+      MONGO_INITDB_ROOT_PASSWORD: madplan_dev_password
+      # Default database to create
+      MONGO_INITDB_DATABASE: madplan-dev
+    volumes:
+      # Persistent data storage
+      - mongodb_data:/data/db
+      # Configuration files
+      - mongodb_config:/data/configdb
+      # Initialization scripts
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - madplan-network
+    command: mongod --auth
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongodb://localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # MongoDB Express - Database Administration Tool (Optional)
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: madplan-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: madplan_dev
+      ME_CONFIG_MONGODB_ADMINPASSWORD: madplan_dev_password
+      ME_CONFIG_MONGODB_URL: mongodb://madplan_dev:madplan_dev_password@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - madplan-network
+
+  # Redis Cache Service (Optional - for future caching features)
+  redis:
+    image: redis:7.2-alpine
+    container_name: madplan-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - madplan-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+# Named volumes for data persistence
+volumes:
+  mongodb_data:
+    driver: local
+    name: madplan_mongodb_data
+  mongodb_config:
+    driver: local
+    name: madplan_mongodb_config
+  redis_data:
+    driver: local
+    name: madplan_redis_data
+
+# Custom network for service communication
+networks:
+  madplan-network:
+    driver: bridge
+    name: madplan_dev_network

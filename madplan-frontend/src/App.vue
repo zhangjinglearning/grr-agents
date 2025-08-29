@@ -26,9 +26,9 @@
 </template>
 
 <script setup lang="ts">
-// Component logic will be added as features are implemented
+  // Component logic will be added as features are implemented
 </script>
 
 <style scoped>
-/* Component-specific styles */
+  /* Component-specific styles */
 </style>

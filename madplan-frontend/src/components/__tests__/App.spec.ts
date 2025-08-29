@@ -8,9 +8,9 @@ describe('App', () => {
       global: {
         stubs: {
           'router-link': true,
-          'router-view': true
-        }
-      }
+          'router-view': true,
+        },
+      },
     })
     expect(wrapper.text()).toContain('MadPlan')
   })
@@ -20,9 +20,9 @@ describe('App', () => {
       global: {
         stubs: {
           'router-link': true,
-          'router-view': true
-        }
-      }
+          'router-view': true,
+        },
+      },
     })
     expect(wrapper.find('header').exists()).toBe(true)
     expect(wrapper.find('nav').exists()).toBe(true)

@@ -10,21 +10,16 @@ export default defineConfig({
     setupFiles: [],
     coverage: {
       reporter: ['text', 'lcov', 'html'],
-      exclude: [
-        'node_modules/',
-        'src/main.ts',
-        '**/*.d.ts',
-        'src/**/__tests__/**',
-      ],
+      exclude: ['node_modules/', 'src/main.ts', '**/*.d.ts', 'src/**/__tests__/**'],
       thresholds: {
         global: {
           branches: 70,
           functions: 70,
           lines: 70,
-          statements: 70
-        }
-      }
-    }
+          statements: 70,
+        },
+      },
+    },
   },
   resolve: {
     alias: {
