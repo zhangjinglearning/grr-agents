@@ -1,8 +1,24 @@
 <template>
-  <div class="bg-white rounded-lg shadow-sm border border-emerald-200 w-80 flex-shrink-0">
+  <div 
+    class="bg-white rounded-lg shadow-sm border border-emerald-200 w-80 flex-shrink-0"
+    :class="[
+      isDragOverList ? 'border-emerald-400 bg-emerald-50' : '',
+      isDraggingList ? 'opacity-90 shadow-xl scale-105 rotate-2' : '',
+      'transition-all duration-200'
+    ]"
+  >
     <!-- List Header -->
     <div class="p-4 border-b border-emerald-100">
       <div class="flex items-center justify-between">
+        <!-- Drag Handle -->
+        <ListDragHandle
+          v-if="!isEditing"
+          :list-title="list.title"
+          :is-dragging="isDraggingList"
+          :disabled="isUpdating || isDeleting"
+          class="mr-3"
+        />
+        
         <!-- List Title -->
         <div class="flex-1 mr-2">
           <div v-if="!isEditing" class="flex items-center">
@@ -90,27 +106,59 @@
     <!-- List Content -->
     <div class="p-4 min-h-[200px] flex flex-col">
       <!-- Cards Area -->
-      <div class="flex-1 space-y-2 mb-3">
-        <!-- Cards List -->
-        <div v-if="orderedCards.length > 0" class="space-y-2">
-          <CardItem
-            v-for="card in orderedCards"
-            :key="card.id"
-            :card="card"
-            :is-updating="isUpdatingCard === card.id"
-            :is-deleting="isDeletingCard === card.id"
-            @update-content="(cardId, content) => $emit('update-card', cardId, content)"
-            @delete="$emit('delete-card', $event)"
-          />
-        </div>
-        
-        <!-- Empty state -->
-        <div v-else class="text-center py-8">
-          <svg class="mx-auto h-8 w-8 text-emerald-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <p class="text-emerald-500 text-sm">No cards yet</p>
-        </div>
+      <div class="flex-1 mb-3">
+        <!-- Draggable Cards List -->
+        <draggable
+          v-model="draggableCards"
+          group="cards"
+          :disabled="isUpdating || isDeleting"
+          item-key="id"
+          class="space-y-2 min-h-[100px]"
+          :class="[
+            isDragOverList && orderedCards.length === 0 ? 'border-2 border-dashed border-emerald-400 rounded-lg p-4' : ''
+          ]"
+          ghost-class="ghost-card"
+          chosen-class="chosen-card"
+          drag-class="drag-card"
+          @start="handleDragStart"
+          @end="handleDragEnd"
+          @change="handleCardChange"
+        >
+          <template #item="{ element: card }">
+            <CardItem
+              :key="card.id"
+              :card="card"
+              :list-id="list.id"
+              :is-updating="isUpdatingCard === card.id"
+              :is-deleting="isDeletingCard === card.id"
+              :is-dragging="draggedCardId === card.id"
+              @update-content="(cardId, content) => $emit('update-card', cardId, content)"
+              @delete="$emit('delete-card', $event)"
+              @drag-start="handleCardDragStart"
+              @drag-end="handleCardDragEnd"
+            />
+          </template>
+          
+          <!-- Empty state when no cards -->
+          <template #header v-if="orderedCards.length === 0">
+            <div 
+              class="text-center py-8"
+              role="region"
+              :aria-label="isDragOverList ? 'Drop zone for cards' : 'Empty list'"
+            >
+              <svg class="mx-auto h-8 w-8 text-emerald-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p class="text-emerald-500 text-sm">
+                {{ isDragOverList ? 'Drop card here' : 'No cards yet' }}
+              </p>
+              <!-- Screen reader announcement for drag state -->
+              <div class="sr-only" aria-live="polite" aria-atomic="true">
+                {{ isDragOverList ? 'Drop zone active for card placement' : '' }}
+              </div>
+            </div>
+          </template>
+        </draggable>
       </div>
 
       <!-- Create Card Form -->
@@ -140,8 +188,10 @@
 
 <script setup lang="ts">
 import { ref, nextTick, computed } from 'vue'
+import draggable from 'vuedraggable'
 import CardItem from '../cards/CardItem.vue'
 import CreateCardForm from '../cards/CreateCardForm.vue'
+import ListDragHandle from './ListDragHandle.vue'
 import type { List, Card } from '../../services/board.service'
 
 interface Props {
@@ -152,6 +202,9 @@ interface Props {
   isUpdatingCard?: string | null
   isDeletingCard?: string | null
   cardError?: string | null
+  isDragOverList?: boolean
+  draggedCardId?: string | null
+  isDraggingList?: boolean
 }
 
 interface Emits {
@@ -161,6 +214,9 @@ interface Emits {
   (event: 'update-card', cardId: string, content: string): void
   (event: 'delete-card', cardId: string): void
   (event: 'card-form-cancel'): void
+  (event: 'card-drag-start', card: Card, sourceListId: string): void
+  (event: 'card-drag-end'): void
+  (event: 'card-reorder', cardId: string, sourceListId: string, destListId: string, newIndex: number): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -169,7 +225,10 @@ const props = withDefaults(defineProps<Props>(), {
   isCreatingCard: false,
   isUpdatingCard: null,
   isDeletingCard: null,
-  cardError: null
+  cardError: null,
+  isDragOverList: false,
+  draggedCardId: null,
+  isDraggingList: false
 })
 
 const emit = defineEmits<Emits>()
@@ -187,6 +246,14 @@ const orderedCards = computed((): Card[] => {
   return props.list.cardOrder
     .map(cardId => cardMap.get(cardId))
     .filter((card): card is Card => card !== undefined)
+})
+
+// Draggable cards - computed getter/setter for v-model
+const draggableCards = computed({
+  get: () => orderedCards.value,
+  set: (value: Card[]) => {
+    // This will be handled by the change event
+  }
 })
 
 // Start editing mode
@@ -224,11 +291,134 @@ const cancelEdit = () => {
   isEditing.value = false
   editTitle.value = ''
 }
+
+// Drag and drop handlers
+const handleDragStart = (evt: any) => {
+  // Called when dragging starts within this list
+}
+
+const handleDragEnd = (evt: any) => {
+  // Called when dragging ends
+}
+
+const handleCardChange = (evt: any) => {
+  if (evt.added) {
+    // Card was dropped into this list from another list
+    const { element: card, newIndex } = evt.added
+    const sourceListId = card.listId // Original list ID
+    emit('card-reorder', card.id, sourceListId, props.list.id, newIndex)
+  } else if (evt.moved) {
+    // Card was reordered within this list
+    const { element: card, newIndex } = evt.moved
+    emit('card-reorder', card.id, props.list.id, props.list.id, newIndex)
+  }
+  // evt.removed is handled by the source list
+}
+
+const handleCardDragStart = (card: Card, sourceListId: string) => {
+  emit('card-drag-start', card, sourceListId)
+}
+
+const handleCardDragEnd = () => {
+  emit('card-drag-end')
+}
 </script>
 
 <style scoped>
 /* Add hover effect for the entire list column */
 .group:hover .opacity-0 {
   @apply opacity-100;
+}
+
+/* Drag and drop styles */
+.ghost-card {
+  @apply opacity-50 bg-emerald-50 border-emerald-300 border-dashed;
+}
+
+.chosen-card {
+  @apply opacity-90 shadow-lg scale-105 rotate-2;
+}
+
+.drag-card {
+  @apply opacity-80 shadow-2xl scale-110 rotate-3 z-50;
+}
+
+/* Drop zone highlighting */
+.drag-over {
+  @apply border-emerald-400 bg-emerald-50;
+}
+
+/* Smooth transitions */
+.sortable-ghost {
+  opacity: 0.4;
+}
+
+.sortable-chosen {
+  opacity: 0.9;
+}
+
+.sortable-drag {
+  opacity: 0.8;
+}
+
+/* Mobile and touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger drop zones for touch */
+  .min-h-[100px] {
+    @apply min-h-[120px]; /* Larger minimum height for easier touch targeting */
+  }
+  
+  /* Enhanced drag feedback for touch devices */
+  .border-dashed {
+    @apply border-4; /* Thicker borders for better visibility */
+  }
+  
+  /* Larger touch targets */
+  button {
+    @apply min-w-[44px] min-h-[44px] p-3; /* WCAG recommended touch target size */
+  }
+}
+
+/* Screen reader only class for announcements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus styles for accessibility */
+.draggable:focus-within {
+  @apply ring-2 ring-emerald-500 ring-offset-2;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border-emerald-400 {
+    @apply border-emerald-800 border-4;
+  }
+  
+  .bg-emerald-50 {
+    @apply bg-emerald-100;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .transition-colors,
+  .transition-all {
+    @apply transition-none;
+  }
+  
+  .ghost-card,
+  .chosen-card,
+  .drag-card {
+    @apply transform-none; /* Remove transforms for reduced motion */
+  }
 }
 </style>

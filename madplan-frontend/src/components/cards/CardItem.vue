@@ -1,5 +1,21 @@
 <template>
-  <div class="bg-white rounded-lg border border-emerald-200 shadow-sm hover:shadow-md transition-shadow group relative">
+  <div 
+    class="bg-white rounded-lg border border-emerald-200 shadow-sm hover:shadow-md transition-all group relative cursor-grab"
+    :class="[
+      isDragging ? 'opacity-50 shadow-lg rotate-2 scale-105 cursor-grabbing' : '',
+      'transition-all duration-200'
+    ]"
+    draggable="true"
+    :tabindex="isEditing ? -1 : 0"
+    role="button"
+    :aria-label="`Card: ${card.content}. Press Enter to edit, Delete to remove, or use drag handles to reorder.`"
+    :aria-describedby="`card-${card.id}-description`"
+    @dragstart="handleDragStart"
+    @dragend="handleDragEnd"
+    @dragover.prevent
+    @click="handleCardClick"
+    @keydown="handleKeydown"
+  >
     <!-- Card Content -->
     <div class="p-3">
       <!-- View Mode -->
@@ -7,9 +23,9 @@
         <div class="flex-1 mr-2">
           <p 
             class="text-gray-700 text-sm leading-relaxed break-words cursor-pointer"
-            @click="startEdit"
             @dblclick="startEdit"
             :title="card.content"
+            :id="`card-${card.id}-description`"
           >
             {{ card.content }}
           </p>
@@ -130,18 +146,23 @@ import type { Card } from '../../services/board.service'
 
 interface Props {
   card: Card
+  listId: string
   isUpdating?: boolean
   isDeleting?: boolean
+  isDragging?: boolean
 }
 
 interface Emits {
   (event: 'update-content', cardId: string, content: string): void
   (event: 'delete', cardId: string): void
+  (event: 'drag-start', card: Card, listId: string): void
+  (event: 'drag-end'): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isUpdating: false,
-  isDeleting: false
+  isDeleting: false,
+  isDragging: false
 })
 
 const emit = defineEmits<Emits>()
@@ -218,6 +239,71 @@ const handleTextareaInput = () => {
     contentInput.value.style.height = `${contentInput.value.scrollHeight}px`
   }
 }
+
+// Handle card click (start edit only if not dragging)
+const handleCardClick = (event: MouseEvent) => {
+  // Don't start edit if we're in the middle of a drag operation
+  // or if clicking on action buttons
+  const target = event.target as HTMLElement
+  const isButton = target.closest('button')
+  
+  if (!props.isDragging && !isButton && !isEditing.value) {
+    startEdit()
+  }
+}
+
+// Handle drag start
+const handleDragStart = (event: DragEvent) => {
+  // Don't allow dragging if editing or in loading state
+  if (isEditing.value || props.isUpdating || props.isDeleting || showDeleteConfirm.value) {
+    event.preventDefault()
+    return
+  }
+
+  // Set drag data
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', props.card.id)
+    event.dataTransfer.setData('application/json', JSON.stringify({
+      cardId: props.card.id,
+      sourceListId: props.listId
+    }))
+  }
+
+  emit('drag-start', props.card, props.listId)
+}
+
+// Handle drag end
+const handleDragEnd = (event: DragEvent) => {
+  emit('drag-end')
+}
+
+// Handle keyboard navigation
+const handleKeydown = (event: KeyboardEvent) => {
+  // Skip if editing or disabled
+  if (isEditing.value || props.isUpdating || props.isDeleting || showDeleteConfirm.value) {
+    return
+  }
+
+  switch (event.key) {
+    case 'Enter':
+    case ' ':
+      event.preventDefault()
+      startEdit()
+      break
+    case 'Delete':
+    case 'Backspace':
+      event.preventDefault()
+      handleDelete()
+      break
+    case 'Escape':
+      if (showDeleteConfirm.value) {
+        event.preventDefault()
+        cancelDelete()
+      }
+      break
+  }
+}
 </script>
 
 <style scoped>
@@ -231,5 +317,50 @@ textarea {
   min-height: 2.5rem;
   max-height: 8rem;
   overflow-y: auto;
+}
+
+/* Mobile and touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch device specific styles */
+  .group {
+    @apply p-4; /* Larger padding for easier touch targets */
+  }
+  
+  .group:hover {
+    @apply shadow-sm; /* Reduce hover effects on touch */
+  }
+  
+  /* Larger touch targets for buttons */
+  button {
+    @apply min-w-[44px] min-h-[44px]; /* WCAG recommended minimum touch target size */
+  }
+  
+  /* Enhanced drag feedback for touch */
+  .cursor-grab {
+    @apply cursor-pointer; /* Better cursor for touch */
+  }
+}
+
+/* Focus styles for accessibility */
+[tabindex="0"]:focus {
+  @apply outline-none ring-2 ring-emerald-500 ring-offset-2;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .bg-white {
+    @apply border-2 border-gray-800;
+  }
+  
+  .text-emerald-600 {
+    @apply text-emerald-800;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    @apply transition-none;
+  }
 }
 </style>

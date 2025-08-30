@@ -14,6 +14,8 @@ import {
   CREATE_CARD_MUTATION,
   UPDATE_CARD_MUTATION,
   DELETE_CARD_MUTATION,
+  REORDER_CARD_MUTATION,
+  REORDER_LIST_MUTATION,
   type Board,
   type List,
   type Card,
@@ -21,7 +23,9 @@ import {
   type CreateListInput,
   type UpdateListInput,
   type CreateCardInput,
-  type UpdateCardInput
+  type UpdateCardInput,
+  type ReorderCardInput,
+  type ReorderListInput
 } from '../services/board.service'
 import { useAuthStore } from './auth'
 
@@ -46,6 +50,18 @@ export const useBoardStore = defineStore('board', () => {
   const isCreatingCard = ref<string | null>(null)
   const isUpdatingCard = ref<string | null>(null)
   const isDeletingCard = ref<string | null>(null)
+  
+  // Drag and drop state
+  const isDragging = ref(false)
+  const draggedCard = ref<Card | null>(null)
+  const draggedFromListId = ref<string | null>(null)
+  const dragOverListId = ref<string | null>(null)
+  const isReorderingCard = ref(false)
+  
+  // List drag and drop state
+  const isDraggingList = ref(false)
+  const draggedList = ref<List | null>(null)
+  const isReorderingList = ref(false)
 
   // Computed
   const boardCount = computed(() => boards.value.length)
@@ -97,6 +113,8 @@ export const useBoardStore = defineStore('board', () => {
   const { mutate: createCardMutation } = useMutation(CREATE_CARD_MUTATION)
   const { mutate: updateCardMutation } = useMutation(UPDATE_CARD_MUTATION)
   const { mutate: deleteCardMutation } = useMutation(DELETE_CARD_MUTATION)
+  const { mutate: reorderCardMutation } = useMutation(REORDER_CARD_MUTATION)
+  const { mutate: reorderListMutation } = useMutation(REORDER_LIST_MUTATION)
 
   // Actions
   const fetchBoards = async (): Promise<void> => {
@@ -566,6 +584,160 @@ export const useBoardStore = defineStore('board', () => {
     return boards.value.find(board => board.id === boardId)
   }
 
+  // Drag and drop actions
+  const startCardDrag = (card: Card, sourceListId: string): void => {
+    isDragging.value = true
+    draggedCard.value = card
+    draggedFromListId.value = sourceListId
+    dragOverListId.value = null
+  }
+
+  const endCardDrag = (): void => {
+    isDragging.value = false
+    draggedCard.value = null
+    draggedFromListId.value = null
+    dragOverListId.value = null
+  }
+
+  const setDragOverList = (listId: string | null): void => {
+    dragOverListId.value = listId
+  }
+
+  const reorderCard = async (cardId: string, sourceListId: string, destListId: string, newIndex: number): Promise<boolean> => {
+    if (!authStore.isAuthenticated || !selectedBoard.value) {
+      error.value = 'User not authenticated or no board selected'
+      return false
+    }
+
+    isReorderingCard.value = true
+    error.value = null
+
+    // Store original state for rollback
+    const originalBoard = JSON.parse(JSON.stringify(selectedBoard.value))
+
+    try {
+      // Optimistic update - update local state immediately
+      const card = selectedBoard.value.lists
+        ?.find(list => list.id === sourceListId)
+        ?.cards?.find(c => c.id === cardId)
+
+      if (!card) {
+        throw new Error('Card not found')
+      }
+
+      // Update card's listId
+      card.listId = destListId
+
+      // Update source list's cardOrder
+      const sourceList = selectedBoard.value.lists?.find(list => list.id === sourceListId)
+      if (sourceList) {
+        sourceList.cardOrder = sourceList.cardOrder.filter(id => id !== cardId)
+        // Also remove from cards array if moving to different list
+        if (sourceListId !== destListId) {
+          sourceList.cards = sourceList.cards?.filter(c => c.id !== cardId) || []
+        }
+      }
+
+      // Update destination list's cardOrder and cards
+      const destList = selectedBoard.value.lists?.find(list => list.id === destListId)
+      if (destList) {
+        // Insert card at new position
+        destList.cardOrder.splice(newIndex, 0, cardId)
+        
+        // Add card to destination list if moving from different list
+        if (sourceListId !== destListId) {
+          if (!destList.cards) destList.cards = []
+          destList.cards.push(card)
+        }
+      }
+
+      // Call backend API
+      const result = await reorderCardMutation({
+        cardId,
+        sourceListId,
+        destListId,
+        newIndex
+      })
+
+      if (result?.data?.reorderCard) {
+        // Update with backend response
+        selectedBoard.value = result.data.reorderCard
+      }
+
+      return true
+    } catch (err: any) {
+      // Rollback optimistic update
+      selectedBoard.value = originalBoard
+      error.value = err.message || 'Failed to reorder card'
+      console.error('Error reordering card:', err)
+      return false
+    } finally {
+      isReorderingCard.value = false
+    }
+  }
+
+  // List drag and drop actions
+  const startListDrag = (list: List): void => {
+    isDraggingList.value = true
+    draggedList.value = list
+  }
+
+  const endListDrag = (): void => {
+    isDraggingList.value = false
+    draggedList.value = null
+  }
+
+  const reorderList = async (listId: string, newIndex: number): Promise<boolean> => {
+    if (!authStore.isAuthenticated || !selectedBoard.value) {
+      error.value = 'User not authenticated or no board selected'
+      return false
+    }
+
+    isReorderingList.value = true
+    error.value = null
+
+    // Store original state for rollback
+    const originalBoard = JSON.parse(JSON.stringify(selectedBoard.value))
+
+    try {
+      // Optimistic update - reorder lists immediately
+      const listOrder = [...selectedBoard.value.listOrder]
+      const currentIndex = listOrder.indexOf(listId)
+      
+      if (currentIndex === -1) {
+        throw new Error('List not found in board order')
+      }
+
+      // Remove list from current position and insert at new position
+      listOrder.splice(currentIndex, 1)
+      listOrder.splice(newIndex, 0, listId)
+      
+      // Update the board's listOrder
+      selectedBoard.value.listOrder = listOrder
+
+      // Call backend API
+      const result = await reorderListMutation({
+        listId,
+        newIndex
+      })
+
+      if (result?.data?.reorderList) {
+        // Update with backend response
+        selectedBoard.value = result.data.reorderList
+      }
+
+      return true
+    } catch (err: any) {
+      // Rollback optimistic update
+      selectedBoard.value = originalBoard
+      error.value = err.message || 'Failed to reorder list'
+      console.error('Error reordering list:', err)
+      return false
+    } finally {
+      isReorderingList.value = false
+    }
+  }
+
   const clearError = (): void => {
     error.value = null
   }
@@ -607,6 +779,18 @@ export const useBoardStore = defineStore('board', () => {
     isUpdatingCard: computed(() => isUpdatingCard.value),
     isDeletingCard: computed(() => isDeletingCard.value),
     
+    // Drag and drop state
+    isDragging: computed(() => isDragging.value),
+    draggedCard: computed(() => draggedCard.value),
+    draggedFromListId: computed(() => draggedFromListId.value),
+    dragOverListId: computed(() => dragOverListId.value),
+    isReorderingCard: computed(() => isReorderingCard.value),
+    
+    // List drag and drop state
+    isDraggingList: computed(() => isDraggingList.value),
+    draggedList: computed(() => draggedList.value),
+    isReorderingList: computed(() => isReorderingList.value),
+    
     // Computed
     boardCount,
     hasBoards,
@@ -631,6 +815,18 @@ export const useBoardStore = defineStore('board', () => {
     createCard,
     updateCard,
     deleteCard,
+    
+    // Drag and drop actions
+    startCardDrag,
+    endCardDrag,
+    setDragOverList,
+    reorderCard,
+    
+    // List drag and drop actions
+    startListDrag,
+    endListDrag,
+    reorderList,
+    
     clearError,
     clearBoards
   }

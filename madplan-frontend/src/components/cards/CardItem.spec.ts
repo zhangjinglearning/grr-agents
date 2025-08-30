@@ -17,7 +17,8 @@ describe('CardItem', () => {
   beforeEach(() => {
     wrapper = mount(CardItem, {
       props: {
-        card: mockCard
+        card: mockCard,
+        listId: 'list-1'
       }
     })
   })
@@ -262,7 +263,10 @@ describe('CardItem', () => {
     const longCard = { ...mockCard, content: longContent }
     
     const longWrapper = mount(CardItem, {
-      props: { card: longCard }
+      props: { 
+        card: longCard,
+        listId: 'list-1'
+      }
     })
     
     const contentP = longWrapper.find('p')

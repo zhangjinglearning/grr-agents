@@ -121,29 +121,57 @@
               </div>
 
               <!-- Lists Horizontal Scroll Container -->
-              <div v-else class="overflow-x-auto">
-                <div class="flex space-x-4 pb-4 min-h-[300px]">
-                  <!-- Existing Lists -->
-                  <ListColumn
-                    v-for="list in boardStore.orderedLists"
-                    :key="list.id"
-                    :list="list"
-                    :is-updating="boardStore.isUpdatingList === list.id"
-                    :is-deleting="boardStore.isDeletingList === list.id"
-                    @update-title="handleUpdateList"
-                    @delete="handleDeleteList"
-                    class="group"
-                  />
-
-                  <!-- Create New List -->
-                  <CreateListForm
-                    :board-id="boardId"
-                    :is-creating="boardStore.isCreatingList"
-                    :error="createListError"
-                    @create="handleCreateList"
-                    @cancel="clearCreateListError"
-                  />
-                </div>
+              <div v-else ref="scrollContainer" class="overflow-x-auto scroll-smooth">
+                <VueDraggable
+                  v-model="draggableLists"
+                  group="lists"
+                  :disabled="boardStore.isLoadingBoard || boardStore.isReorderingList"
+                  item-key="id"
+                  class="flex space-x-4 pb-4 min-h-[300px]"
+                  ghost-class="ghost-list"
+                  chosen-class="chosen-list"
+                  drag-class="drag-list"
+                  :animation="150"
+                  :swap-threshold="0.65"
+                  @start="handleListDragStart"
+                  @end="handleListDragEnd"
+                  @change="handleListReorder"
+                >
+                  <template #item="{ element: list }">
+                    <ListColumn
+                      :list="list"
+                      :is-updating="boardStore.isUpdatingList === list.id"
+                      :is-deleting="boardStore.isDeletingList === list.id"
+                      :is-creating-card="boardStore.isCreatingCard === list.id"
+                      :is-updating-card="boardStore.isUpdatingCard"
+                      :is-deleting-card="boardStore.isDeletingCard"
+                      :card-error="cardError"
+                      :is-drag-over-list="boardStore.dragOverListId === list.id"
+                      :dragged-card-id="boardStore.draggedCard?.id || null"
+                      :is-dragging-list="boardStore.draggedList?.id === list.id"
+                      @update-title="(listId: string, title: string) => handleUpdateList(listId, title)"
+                      @delete="(listId: string) => handleDeleteList(listId)"
+                      @create-card="(listId: string, content: string) => handleCreateCard(listId, content)"
+                      @update-card="(cardId: string, content: string) => handleUpdateCard(cardId, content)"
+                      @delete-card="(cardId: string) => handleDeleteCard(cardId)"
+                      @card-form-cancel="clearCardError"
+                      @card-drag-start="(card: any, sourceListId: string) => handleCardDragStart(card, sourceListId)"
+                      @card-drag-end="handleCardDragEnd"
+                      @card-reorder="(cardId: string, sourceListId: string, destListId: string, newIndex: number) => handleCardReorder(cardId, sourceListId, destListId, newIndex)"
+                      class="group"
+                    />
+                  </template>
+                  
+                  <template #footer>
+                    <CreateListForm
+                      :board-id="boardId"
+                      :is-creating="boardStore.isCreatingList"
+                      :error="createListError"
+                      @create="handleCreateList"
+                      @cancel="clearCreateListError"
+                    />
+                  </template>
+                </VueDraggable>
               </div>
 
               <!-- Empty State -->
@@ -159,6 +187,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Screen Reader Live Region for Announcements -->
+    <div
+      class="sr-only"
+      aria-live="polite"
+      aria-atomic="true"
+      role="status"
+    >
+      {{ screenReaderAnnouncement }}
+    </div>
   </div>
 </template>
 
@@ -169,6 +207,7 @@ import { useAuthStore } from '../stores/auth'
 import { useBoardStore } from '../stores/board'
 import ListColumn from '../components/lists/ListColumn.vue'
 import CreateListForm from '../components/lists/CreateListForm.vue'
+import VueDraggable from 'vuedraggable'
 import type { Board } from '../services/board.service'
 
 const route = useRoute()
@@ -181,10 +220,20 @@ const board = ref<Board | null>(null)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 const createListError = ref<string | null>(null)
+const cardError = ref<string | null>(null)
+const screenReaderAnnouncement = ref<string>('')
 
 // Computed properties
 const userEmail = computed(() => authStore.user?.email || 'User')
 const boardId = computed(() => route.params.id as string)
+
+// Draggable lists computed property
+const draggableLists = computed({
+  get: () => boardStore.orderedLists,
+  set: (value) => {
+    // This will be handled by the @change event
+  }
+})
 
 // Load board data with lists
 const loadBoard = async () => {
@@ -198,8 +247,8 @@ const loadBoard = async () => {
     isLoading.value = true
     error.value = null
 
-    // Fetch board with lists using the store
-    const fetchedBoard = await boardStore.fetchBoardWithLists(boardId.value)
+    // Fetch board with lists and cards using the store
+    const fetchedBoard = await boardStore.fetchBoardWithListsAndCards(boardId.value)
     
     if (fetchedBoard) {
       board.value = fetchedBoard
@@ -250,6 +299,177 @@ const clearCreateListError = () => {
   createListError.value = null
 }
 
+// Card management handlers
+const handleCreateCard = async (listId: string, content: string) => {
+  try {
+    cardError.value = null
+    await boardStore.createCard(listId, content)
+  } catch (err: any) {
+    cardError.value = err.message || 'Failed to create card'
+    console.error('Failed to create card:', err)
+  }
+}
+
+const handleUpdateCard = async (cardId: string, content: string) => {
+  try {
+    await boardStore.updateCard(cardId, content)
+  } catch (err: any) {
+    console.error('Failed to update card:', err)
+    // The error will be handled by the store
+  }
+}
+
+const handleDeleteCard = async (cardId: string) => {
+  try {
+    const confirmed = window.confirm('Are you sure you want to delete this card?')
+    if (confirmed) {
+      await boardStore.deleteCard(cardId)
+    }
+  } catch (err: any) {
+    console.error('Failed to delete card:', err)
+    // The error will be handled by the store
+  }
+}
+
+const clearCardError = () => {
+  cardError.value = null
+}
+
+// Drag and drop handlers
+const handleCardDragStart = (card: any, sourceListId: string) => {
+  boardStore.startCardDrag(card, sourceListId)
+}
+
+const handleCardDragEnd = () => {
+  boardStore.endCardDrag()
+}
+
+const handleCardReorder = async (cardId: string, sourceListId: string, destListId: string, newIndex: number) => {
+  try {
+    await boardStore.reorderCard(cardId, sourceListId, destListId, newIndex)
+  } catch (err: any) {
+    console.error('Failed to reorder card:', err)
+    // The error will be handled by the store
+  }
+}
+
+// Auto-scroll functionality
+const scrollContainer = ref<HTMLElement | null>(null)
+const isAutoScrolling = ref(false)
+const autoScrollSpeed = 5
+const scrollThreshold = 100
+
+const handleAutoScroll = (clientX: number) => {
+  if (!scrollContainer.value) return
+
+  const containerRect = scrollContainer.value.getBoundingClientRect()
+  const leftThreshold = containerRect.left + scrollThreshold
+  const rightThreshold = containerRect.right - scrollThreshold
+
+  if (clientX < leftThreshold) {
+    // Scroll left
+    isAutoScrolling.value = true
+    const scrollLeft = () => {
+      if (scrollContainer.value && isAutoScrolling.value) {
+        scrollContainer.value.scrollLeft -= autoScrollSpeed
+        requestAnimationFrame(scrollLeft)
+      }
+    }
+    scrollLeft()
+  } else if (clientX > rightThreshold) {
+    // Scroll right
+    isAutoScrolling.value = true
+    const scrollRight = () => {
+      if (scrollContainer.value && isAutoScrolling.value) {
+        scrollContainer.value.scrollLeft += autoScrollSpeed
+        requestAnimationFrame(scrollRight)
+      }
+    }
+    scrollRight()
+  } else {
+    isAutoScrolling.value = false
+  }
+}
+
+const stopAutoScroll = () => {
+  isAutoScrolling.value = false
+}
+
+// List drag and drop handlers
+const handleListDragStart = (event: any) => {
+  const list = event.item.__vueParentComponent?.props?.list
+  if (list) {
+    boardStore.startListDrag(list)
+    
+    // Screen reader announcement
+    screenReaderAnnouncement.value = `Started dragging list: ${list.title}`
+    
+    // Add mouse move listener for auto-scroll
+    const handleMouseMove = (e: MouseEvent) => {
+      handleAutoScroll(e.clientX)
+    }
+    
+    document.addEventListener('mousemove', handleMouseMove)
+    
+    // Clean up listener on drag end
+    const cleanup = () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', cleanup)
+      stopAutoScroll()
+    }
+    
+    document.addEventListener('mouseup', cleanup)
+    
+    // Haptic feedback for mobile devices
+    if (navigator.vibrate) {
+      navigator.vibrate(50) // Short vibration
+    }
+  }
+}
+
+const handleListDragEnd = () => {
+  const draggedList = boardStore.draggedList
+  boardStore.endListDrag()
+  stopAutoScroll()
+  
+  // Screen reader announcement
+  if (draggedList) {
+    screenReaderAnnouncement.value = `Stopped dragging list: ${draggedList.title}`
+  }
+  
+  // Success haptic feedback for mobile devices
+  if (navigator.vibrate) {
+    navigator.vibrate([50, 50, 50]) // Triple short vibration pattern
+  }
+}
+
+const handleListReorder = async (event: any) => {
+  if (event.moved) {
+    const { element: list, newIndex } = event.moved
+    try {
+      await boardStore.reorderList(list.id, newIndex)
+      
+      // Screen reader announcement
+      screenReaderAnnouncement.value = `Moved list "${list.title}" to position ${newIndex + 1}`
+      
+      // Success feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(100) // Confirmation vibration
+      }
+    } catch (err: any) {
+      console.error('Failed to reorder list:', err)
+      
+      // Error announcement
+      screenReaderAnnouncement.value = `Failed to move list "${list.title}". Please try again.`
+      
+      // Error feedback
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]) // Error vibration pattern
+      }
+    }
+  }
+}
+
 // Initialize board on mount
 onMounted(() => {
   if (!authStore.isAuthenticated) {
@@ -260,3 +480,135 @@ onMounted(() => {
   loadBoard()
 })
 </script>
+
+<style scoped>
+/* List drag-and-drop styles */
+.ghost-list {
+  @apply opacity-30 bg-emerald-50 border-emerald-300 border-dashed;
+}
+
+.chosen-list {
+  @apply opacity-90 shadow-xl scale-105 rotate-2;
+  transform-origin: center;
+}
+
+.drag-list {
+  @apply opacity-80 shadow-2xl scale-110 rotate-3 z-50;
+  transform-origin: center;
+}
+
+/* Smooth transitions for list movement */
+.flip-list-move {
+  transition: transform 0.5s;
+}
+
+/* Auto-scroll visual feedback */
+.auto-scroll-indicator {
+  @apply absolute top-1/2 transform -translate-y-1/2 w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center opacity-75 z-10;
+}
+
+.auto-scroll-left {
+  @apply left-2;
+}
+
+.auto-scroll-right {
+  @apply right-2;
+}
+
+/* Enhanced mobile drag feedback */
+@media (hover: none) and (pointer: coarse) {
+  .ghost-list {
+    @apply opacity-50 scale-95 border-4; /* Enhanced visual feedback for touch */
+  }
+
+  .chosen-list {
+    @apply opacity-95 shadow-2xl scale-110; /* More dramatic feedback for touch */
+  }
+
+  .drag-list {
+    @apply opacity-85 shadow-2xl scale-115 z-50; /* Enhanced drag state for touch */
+  }
+
+  /* Larger touch targets and improved spacing */
+  .flex.space-x-4 {
+    @apply space-x-6; /* More space between lists for easier touch interaction */
+  }
+
+  /* Enhanced scroll indicators for touch */
+  .overflow-x-auto {
+    scrollbar-width: thick;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 12px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    @apply bg-emerald-400 rounded-full;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-track {
+    @apply bg-emerald-100;
+  }
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .flip-list-move,
+  .transition-all,
+  .scroll-smooth {
+    @apply transition-none;
+  }
+
+  /* Disable transforms that might cause motion sensitivity */
+  .ghost-list,
+  .chosen-list,
+  .drag-list {
+    @apply transform-none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border-emerald-300 {
+    @apply border-emerald-800 border-4;
+  }
+
+  .bg-emerald-50 {
+    @apply bg-emerald-200;
+  }
+
+  .shadow-xl,
+  .shadow-2xl {
+    @apply shadow-black;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.vue-draggable:focus-within {
+  @apply ring-2 ring-emerald-500 ring-offset-2;
+}
+
+/* Screen reader announcements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+/* Smooth scrolling enhancement */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+</style>

@@ -46,6 +46,18 @@ export interface UpdateCardInput {
   content?: string
 }
 
+export interface ReorderCardInput {
+  cardId: string
+  sourceListId: string
+  destListId: string
+  newIndex: number
+}
+
+export interface ReorderListInput {
+  listId: string
+  newIndex: number
+}
+
 // GraphQL queries
 export const MY_BOARDS_QUERY = gql`
   query MyBoards {
@@ -166,5 +178,43 @@ export const UPDATE_CARD_MUTATION = gql`
 export const DELETE_CARD_MUTATION = gql`
   mutation DeleteCard($id: ID!) {
     deleteCard(id: $id)
+  }
+`
+
+export const REORDER_CARD_MUTATION = gql`
+  mutation ReorderCard($cardId: ID!, $sourceListId: ID!, $destListId: ID!, $newIndex: Int!) {
+    reorderCard(cardId: $cardId, sourceListId: $sourceListId, destListId: $destListId, newIndex: $newIndex) {
+      id
+      title
+      listOrder
+      lists {
+        id
+        title
+        cardOrder
+        cards {
+          id
+          content
+        }
+      }
+    }
+  }
+`
+
+export const REORDER_LIST_MUTATION = gql`
+  mutation ReorderList($listId: ID!, $newIndex: Int!) {
+    reorderList(listId: $listId, newIndex: $newIndex) {
+      id
+      title
+      listOrder
+      lists {
+        id
+        title
+        cardOrder
+        cards {
+          id
+          content
+        }
+      }
+    }
   }
 `
