@@ -1,11 +1,11 @@
-import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
-import { ValidationPipe } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service';
-import { UsersService } from './users.service';
-import { RegisterUserInput } from './dto/register-user.input';
-import { LoginUserInput } from './dto/login-user.input';
-import { AuthPayload } from './dto/auth-payload.dto';
-import { User } from './user.entity';
+import { Resolver, Mutation, Args, Query } from "@nestjs/graphql";
+import { ValidationPipe } from "@nestjs/common";
+import { AuthService } from "../auth/auth.service";
+import { UsersService } from "./users.service";
+import { RegisterUserInput } from "./dto/register-user.input";
+import { LoginUserInput } from "./dto/login-user.input";
+import { AuthPayload } from "./dto/auth-payload.dto";
+import { User } from "./user.entity";
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -20,10 +20,10 @@ export class UsersResolver {
    * @returns AuthPayload containing JWT token and user data
    */
   @Mutation(() => AuthPayload, {
-    description: 'Register a new user account with email and password',
+    description: "Register a new user account with email and password",
   })
   async register(
-    @Args('input', new ValidationPipe({ transform: true })) 
+    @Args("input", new ValidationPipe({ transform: true }))
     registerUserInput: RegisterUserInput,
   ): Promise<AuthPayload> {
     return this.authService.register(registerUserInput);
@@ -35,13 +35,16 @@ export class UsersResolver {
    * @returns AuthPayload containing JWT token and user data
    */
   @Mutation(() => AuthPayload, {
-    description: 'Login user with email and password',
+    description: "Login user with email and password",
   })
   async login(
-    @Args('input', new ValidationPipe({ transform: true }))
+    @Args("input", new ValidationPipe({ transform: true }))
     loginUserInput: LoginUserInput,
   ): Promise<AuthPayload> {
-    return this.authService.login(loginUserInput.email, loginUserInput.password);
+    return this.authService.login(
+      loginUserInput.email,
+      loginUserInput.password,
+    );
   }
 
   /**
@@ -49,7 +52,7 @@ export class UsersResolver {
    * @returns Total number of registered users
    */
   @Query(() => Number, {
-    description: 'Get total number of registered users',
+    description: "Get total number of registered users",
   })
   async userCount(): Promise<number> {
     return this.usersService.getUserCount();
@@ -60,7 +63,7 @@ export class UsersResolver {
    * @returns Simple confirmation message
    */
   @Query(() => String, {
-    description: 'Health check for users module',
+    description: "Health check for users module",
   })
   async usersHealth(): Promise<string> {
     const count = await this.usersService.getUserCount();

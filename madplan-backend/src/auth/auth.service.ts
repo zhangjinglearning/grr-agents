@@ -1,10 +1,14 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { UsersService } from '../users/users.service';
-import { User, UserDocument } from '../users/user.entity';
-import { RegisterUserInput } from '../users/dto/register-user.input';
-import { AuthPayload } from '../users/dto/auth-payload.dto';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import { UsersService } from "../users/users.service";
+import { User, UserDocument } from "../users/user.entity";
+import { RegisterUserInput } from "../users/dto/register-user.input";
+import { AuthPayload } from "../users/dto/auth-payload.dto";
 
 export interface JwtPayload {
   sub: string; // User ID
@@ -50,7 +54,7 @@ export class AuthService {
     // Find user by email
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException("Invalid email or password");
     }
 
     // Verify password
@@ -59,7 +63,7 @@ export class AuthService {
       user.password,
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException("Invalid email or password");
     }
 
     // Generate JWT token
@@ -80,7 +84,7 @@ export class AuthService {
   async validateUser(userId: string): Promise<User> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException("User not found");
     }
 
     return user.toObject(); // Remove password from response
@@ -99,8 +103,8 @@ export class AuthService {
     };
 
     return this.jwtService.signAsync(payload, {
-      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN', '7d'),
-      secret: this.configService.get<string>('JWT_SECRET'),
+      expiresIn: this.configService.get<string>("JWT_EXPIRES_IN", "7d"),
+      secret: this.configService.get<string>("JWT_SECRET"),
     });
   }
 
@@ -113,10 +117,10 @@ export class AuthService {
   async verifyToken(token: string): Promise<JwtPayload> {
     try {
       return await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
+        secret: this.configService.get<string>("JWT_SECRET"),
       });
     } catch (error) {
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException("Invalid or expired token");
     }
   }
 

@@ -1,13 +1,20 @@
-import { Injectable, ConflictException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import * as bcrypt from 'bcrypt';
-import { User, UserDocument } from './user.entity';
-import { RegisterUserInput } from './dto/register-user.input';
+import {
+  Injectable,
+  ConflictException,
+  BadRequestException,
+  InternalServerErrorException,
+} from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import * as bcrypt from "bcrypt";
+import { User, UserDocument } from "./user.entity";
+import { RegisterUserInput } from "./dto/register-user.input";
 
 @Injectable()
 export class UsersService {
-  private readonly saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
+  private readonly saltRounds = parseInt(
+    process.env.BCRYPT_SALT_ROUNDS || "12",
+  );
 
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
@@ -29,7 +36,7 @@ export class UsersService {
       const existingUser = await this.findByEmail(email);
       if (existingUser) {
         throw new ConflictException(
-          'An account with this email address already exists'
+          "An account with this email address already exists",
         );
       }
 
@@ -55,19 +62,23 @@ export class UsersService {
       // Handle MongoDB duplicate key error (E11000)
       if (error.code === 11000 && error.keyPattern?.email) {
         throw new ConflictException(
-          'An account with this email address already exists'
+          "An account with this email address already exists",
         );
       }
 
       // Handle validation errors
-      if (error.name === 'ValidationError') {
-        const messages = Object.values(error.errors).map((err: any) => err.message);
-        throw new BadRequestException(`Validation failed: ${messages.join(', ')}`);
+      if (error.name === "ValidationError") {
+        const messages = Object.values(error.errors).map(
+          (err: any) => err.message,
+        );
+        throw new BadRequestException(
+          `Validation failed: ${messages.join(", ")}`,
+        );
       }
 
       // Handle other database errors
       throw new InternalServerErrorException(
-        'Failed to create user account. Please try again later.'
+        "Failed to create user account. Please try again later.",
       );
     }
   }
@@ -79,12 +90,14 @@ export class UsersService {
    */
   async findByEmail(email: string): Promise<UserDocument | null> {
     try {
-      return await this.userModel.findOne({ 
-        email: email.toLowerCase().trim() 
-      }).exec();
+      return await this.userModel
+        .findOne({
+          email: email.toLowerCase().trim(),
+        })
+        .exec();
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to search for user. Please try again later.'
+        "Failed to search for user. Please try again later.",
       );
     }
   }
@@ -99,7 +112,7 @@ export class UsersService {
       return await this.userModel.findById(id).exec();
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to find user. Please try again later.'
+        "Failed to find user. Please try again later.",
       );
     }
   }
@@ -115,7 +128,7 @@ export class UsersService {
       return await bcrypt.hash(password, this.saltRounds);
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to process password. Please try again later.'
+        "Failed to process password. Please try again later.",
       );
     }
   }
@@ -126,12 +139,15 @@ export class UsersService {
    * @param hashedPassword - Hashed password from database
    * @returns True if password matches, false otherwise
    */
-  async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  async verifyPassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
     try {
       return await bcrypt.compare(password, hashedPassword);
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to verify password. Please try again later.'
+        "Failed to verify password. Please try again later.",
       );
     }
   }
@@ -145,7 +161,7 @@ export class UsersService {
       return await this.userModel.countDocuments().exec();
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to get user count. Please try again later.'
+        "Failed to get user count. Please try again later.",
       );
     }
   }

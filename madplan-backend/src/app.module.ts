@@ -8,6 +8,7 @@ import { AppService } from "./app.service";
 import { AppResolver } from "./app.resolver";
 import { UsersModule } from "./users/users.module";
 import { AuthModule } from "./auth/auth.module";
+import { BoardsModule } from "./boards/boards.module";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AuthModule } from "./auth/auth.module";
     // Feature modules
     UsersModule,
     AuthModule,
+    BoardsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],

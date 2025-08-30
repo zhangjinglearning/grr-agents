@@ -1,13 +1,13 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
+import { Field, ID, ObjectType } from "@nestjs/graphql";
+import { IsEmail, IsString, MinLength } from "class-validator";
 
 export type UserDocument = User & Document;
 
 @Schema({
   timestamps: true, // Adds createdAt and updatedAt fields
-  collection: 'users',
+  collection: "users",
 })
 @ObjectType()
 export class User {
@@ -44,7 +44,7 @@ export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index({ email: 1 }, { unique: true });
 
 // Pre-save middleware to ensure email is lowercase and trimmed
-UserSchema.pre('save', function (next) {
+UserSchema.pre("save", function (next) {
   if (this.email) {
     this.email = this.email.toLowerCase().trim();
   }
@@ -52,7 +52,7 @@ UserSchema.pre('save', function (next) {
 });
 
 // Transform the toJSON output to exclude password and include id
-UserSchema.set('toJSON', {
+UserSchema.set("toJSON", {
   transform: (doc, ret) => {
     ret.id = ret._id.toString();
     delete ret._id;
@@ -63,7 +63,7 @@ UserSchema.set('toJSON', {
 });
 
 // Transform the toObject output similarly
-UserSchema.set('toObject', {
+UserSchema.set("toObject", {
   transform: (doc, ret) => {
     ret.id = ret._id.toString();
     delete ret._id;

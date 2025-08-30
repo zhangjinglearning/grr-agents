@@ -40,6 +40,15 @@ const routes: Array<RouteRecordRaw> = [
       requiresAuth: true,
     },
   },
+  {
+    path: '/board/:id',
+    name: 'Board',
+    component: () => import('../views/BoardView.vue'),
+    meta: {
+      title: 'Board - MadPlan',
+      requiresAuth: true,
+    },
+  },
   
   // 404 route
   {
