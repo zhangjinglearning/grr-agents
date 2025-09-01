@@ -62,12 +62,53 @@ export default defineConfig(({ mode }) => {
           manualChunks: {
             vendor: ['vue', 'vue-router', 'pinia'],
             apollo: ['@apollo/client', '@vue/apollo-composable'],
+            utils: ['@vueuse/core', 'jwt-decode'],
+            ui: ['vuedraggable'],
+          },
+          // Optimize chunk filenames for better caching
+          chunkFileNames: (chunkInfo) => {
+            const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+            return `js/${facadeModuleId}-[hash].js`;
+          },
+          entryFileNames: 'js/[name]-[hash].js',
+          assetFileNames: (assetInfo) => {
+            const info = assetInfo.name!.split('.');
+            const ext = info[info.length - 1];
+            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name!)) {
+              return `images/[name]-[hash].${ext}`;
+            } else if (/\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name!)) {
+              return `fonts/[name]-[hash].${ext}`;
+            }
+            return `assets/[name]-[hash].${ext}`;
           },
         },
+        // Tree shaking and optimization
+        treeshake: {
+          moduleSideEffects: false,
+          propertyReadSideEffects: false,
+          tryCatchDeoptimization: false,
+        },
       },
-      // Build optimization
-      minify: !isDev,
-      target: 'esnext',
+      // Advanced build optimization
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: !isDev,
+          drop_debugger: !isDev,
+          pure_funcs: !isDev ? ['console.log', 'console.info', 'console.debug'] : [],
+        },
+        format: {
+          comments: false,
+        },
+      },
+      target: 'es2020',
+      // Bundle size limits
+      chunkSizeWarningLimit: 500,
+      reportCompressedSize: !isDev,
+      // CSS code splitting
+      cssCodeSplit: true,
+      // Asset inlining threshold
+      assetsInlineLimit: 4096,
     },
     define: {
       __VUE_OPTIONS_API__: true,

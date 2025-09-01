@@ -1,0 +1,406 @@
+# Security Configuration for MadPlan Backend
+# Comprehensive security settings for production deployment
+
+# JWT Configuration
+jwt:
+  algorithm: "RS256"
+  accessToken:
+    expiresIn: "15m"
+    issuer: "madplan-api"
+    audience: "madplan-client"
+  refreshToken:
+    expiresIn: "7d"
+    issuer: "madplan-api"
+    audience: "madplan-client"
+  secretsManager:
+    accessSecretArn: "${AWS_SECRET_ARN_JWT_ACCESS}"
+    refreshSecretArn: "${AWS_SECRET_ARN_JWT_REFRESH}"
+  keyRotation:
+    enabled: true
+    intervalDays: 30
+    notificationTopicArn: "${AWS_SNS_TOPIC_SECURITY_ALERTS}"
+
+# Authentication Configuration
+auth:
+  passwordPolicy:
+    minLength: 12
+    requireUppercase: true
+    requireLowercase: true
+    requireNumbers: true
+    requireSymbols: true
+    preventCommonPasswords: true
+    preventUserInfo: true
+    maxAttempts: 5
+    lockoutDuration: "30m"
+  
+  session:
+    secure: true
+    httpOnly: true
+    sameSite: "strict"
+    maxAge: 900000  # 15 minutes
+    rolling: true
+    
+  multiFactorAuth:
+    enabled: true
+    requireForRoles: ["admin", "moderator"]
+    providers:
+      - "totp"
+      - "sms"
+    backupCodes:
+      enabled: true
+      count: 10
+
+# Authorization Configuration
+authorization:
+  rbac:
+    enabled: true
+    strictMode: true
+    defaultRole: "user"
+    roleHierarchy:
+      - "user"
+      - "premium"
+      - "moderator" 
+      - "admin"
+      - "super-admin"
+  
+  permissions:
+    user:
+      - "board:create"
+      - "board:read:own"
+      - "board:update:own"
+      - "board:delete:own"
+      - "profile:read:own"
+      - "profile:update:own"
+    premium:
+      - "inherit:user"
+      - "theme:premium"
+      - "export:advanced"
+      - "analytics:basic"
+    moderator:
+      - "inherit:premium"
+      - "board:read:any"
+      - "user:read:basic"
+      - "report:handle"
+    admin:
+      - "inherit:moderator"
+      - "user:manage"
+      - "system:monitor"
+      - "audit:read"
+    super-admin:
+      - "inherit:admin"
+      - "system:configure"
+      - "security:manage"
+
+# Rate Limiting Configuration
+rateLimiting:
+  enabled: true
+  strategy: "sliding-window"
+  storage: "redis"
+  
+  limits:
+    authentication:
+      windowMs: 900000  # 15 minutes
+      maxRequests: 5
+      skipSuccessfulRequests: false
+      skipFailedRequests: false
+      
+    api:
+      general:
+        windowMs: 60000  # 1 minute
+        maxRequests: 100
+      
+      user:
+        windowMs: 60000
+        maxRequests: 60
+        
+      premium:
+        windowMs: 60000
+        maxRequests: 120
+        
+      admin:
+        windowMs: 60000
+        maxRequests: 200
+    
+    upload:
+      windowMs: 300000  # 5 minutes
+      maxRequests: 10
+      maxSize: "10MB"
+      
+  customRules:
+    - path: "/api/auth/*"
+      windowMs: 300000
+      maxRequests: 20
+      
+    - path: "/api/boards"
+      method: "POST"
+      windowMs: 60000
+      maxRequests: 10
+
+# Input Validation and Sanitization
+validation:
+  strict: true
+  sanitizeInput: true
+  validateSchemas: true
+  
+  bodyParser:
+    limit: "1MB"
+    extended: false
+    parameterLimit: 100
+    
+  fileUpload:
+    enabled: true
+    maxFileSize: "10MB"
+    maxFiles: 5
+    allowedMimeTypes:
+      - "image/jpeg"
+      - "image/png"
+      - "image/webp"
+      - "application/json"
+      - "text/csv"
+    scanForMalware: true
+    
+  sanitization:
+    html: true
+    sql: true
+    nosql: true
+    javascript: true
+
+# HTTPS and Transport Security
+https:
+  enforced: true
+  hsts:
+    enabled: true
+    maxAge: 31536000  # 1 year
+    includeSubDomains: true
+    preload: true
+    
+  certificatePinning:
+    enabled: true
+    pins:
+      - "sha256-primary-cert-hash"
+      - "sha256-backup-cert-hash"
+      
+  tlsVersion:
+    min: "1.3"
+    cipherSuites:
+      - "TLS_AES_256_GCM_SHA384"
+      - "TLS_CHACHA20_POLY1305_SHA256"
+      - "TLS_AES_128_GCM_SHA256"
+
+# CORS Configuration
+cors:
+  enabled: true
+  strictMode: true
+  
+  production:
+    origins:
+      - "https://madplan.com"
+      - "https://www.madplan.com"
+      - "https://app.madplan.com"
+    credentials: true
+    maxAge: 86400  # 1 day
+    
+  development:
+    origins:
+      - "http://localhost:5173"
+      - "http://localhost:3000"
+      - "https://localhost:5173"
+    credentials: true
+
+# Content Security Policy
+csp:
+  enabled: true
+  reportOnly: false
+  
+  directives:
+    defaultSrc: ["'self'"]
+    scriptSrc: 
+      - "'self'"
+      - "'unsafe-inline'"  # Only for development
+      - "https://cdnjs.cloudflare.com"
+    styleSrc:
+      - "'self'"
+      - "'unsafe-inline'"
+      - "https://fonts.googleapis.com"
+    imgSrc:
+      - "'self'"
+      - "data:"
+      - "https://images.madplan.com"
+      - "https://cdn.madplan.com"
+    fontSrc:
+      - "'self'"
+      - "https://fonts.gstatic.com"
+    connectSrc:
+      - "'self'"
+      - "https://api.madplan.com"
+    frameSrc: ["'none'"]
+    objectSrc: ["'none'"]
+    
+  reportUri: "https://api.madplan.com/csp-report"
+
+# Data Protection and Privacy
+dataProtection:
+  gdpr:
+    enabled: true
+    consentRequired: true
+    dataRetentionDays: 365
+    anonymizationDelay: 30
+    
+  pii:
+    encryption:
+      enabled: true
+      algorithm: "AES-256-GCM"
+      keyRotation: true
+      keyRotationDays: 90
+      
+    masking:
+      enabled: true
+      fields:
+        - "email"
+        - "phone"
+        - "address"
+      maskingChar: "*"
+      preserveLength: false
+      
+  auditTrail:
+    enabled: true
+    includeRequests: true
+    includeResponses: false
+    sensitiveFields:
+      - "password"
+      - "token"
+      - "secret"
+      - "key"
+
+# Monitoring and Alerting
+security_monitoring:
+  enabled: true
+  
+  anomalyDetection:
+    enabled: true
+    thresholds:
+      failedLogins: 10
+      rapidRequests: 1000
+      suspiciousPatterns: 5
+      
+  alerts:
+    channels:
+      - "sns"
+      - "slack"
+      - "email"
+      
+    events:
+      - "authenticationFailure"
+      - "authorizationDenied"
+      - "rateLimitExceeded"
+      - "suspiciousActivity"
+      - "dataAccess"
+      - "configurationChange"
+      
+  logging:
+    level: "warn"
+    includeUserAgent: true
+    includeIpAddress: true
+    excludeHealthChecks: true
+    
+    sensitiveFieldsHandling: "mask"
+    logRetentionDays: 90
+    
+    structuredLogging: true
+    logFormat: "json"
+
+# Incident Response
+incidentResponse:
+  enabled: true
+  
+  automatedResponse:
+    suspiciousActivity:
+      enabled: true
+      actions:
+        - "logAlert"
+        - "increasemonitoring"
+        - "notifySecurityTeam"
+        
+    rateLimitBreach:
+      enabled: true
+      actions:
+        - "temporaryBlock"
+        - "logAlert"
+        
+    authenticationAttack:
+      enabled: true
+      actions:
+        - "accountLockout"
+        - "ipBlock"
+        - "notifyUser"
+        - "escalateToSecurity"
+  
+  quarantine:
+    enabled: true
+    suspiciousUpload:
+      isolate: true
+      scanDuration: 300  # 5 minutes
+      notifyAdmin: true
+
+# Compliance Settings
+compliance:
+  frameworks:
+    - "GDPR"
+    - "SOC2"
+    - "ISO27001"
+    
+  auditLogging:
+    enabled: true
+    includeAllAccess: true
+    retentionYears: 7
+    immutableStorage: true
+    
+  dataClassification:
+    enabled: true
+    levels:
+      - "public"
+      - "internal"
+      - "confidential" 
+      - "restricted"
+      
+    defaultLevel: "internal"
+    
+  accessReviews:
+    enabled: true
+    frequency: "quarterly"
+    requireApproval: true
+    autoRevoke: false
+
+# Environment Specific Overrides
+environments:
+  production:
+    auth:
+      passwordPolicy:
+        minLength: 16
+      multiFactorAuth:
+        required: true
+        
+    rateLimiting:
+      limits:
+        authentication:
+          maxRequests: 3
+          
+    security_monitoring:
+      anomalyDetection:
+        thresholds:
+          failedLogins: 5
+          
+  staging:
+    auth:
+      passwordPolicy:
+        minLength: 8
+      multiFactorAuth:
+        required: false
+        
+  development:
+    rateLimiting:
+      enabled: false
+    security_monitoring:
+      enabled: false
+    https:
+      enforced: false

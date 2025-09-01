@@ -1,0 +1,219 @@
+/* Totoro Theme - Forest sanctuary with earth greens and gentle browns */
+
+[data-theme="totoro"] {
+  /* Primary Colors - Forest greens */
+  --color-primary: #10B981;
+  --color-primary-light: #059669;
+  --color-primary-dark: #047857;
+  
+  /* Secondary Colors - Earth browns */
+  --color-secondary: #92400E;
+  --color-secondary-light: #B45309;
+  --color-secondary-dark: #78350F;
+  
+  /* Accent Colors - Sky blues */
+  --color-accent: #3B82F6;
+  --color-accent-light: #2563EB;
+  --color-accent-dark: #1D4ED8;
+  
+  /* Neutral Colors - Natural grays */
+  --color-gray-900: #1F2937;
+  --color-gray-600: #4B5563;
+  --color-gray-400: #9CA3AF;
+  --color-gray-200: #E5E7EB;
+  --color-gray-50: #F9FAFB;
+  
+  /* Background Colors - Natural forest patterns */
+  --bg-main: linear-gradient(135deg, #10B981 0%, #059669 25%, #34D399 50%, #6EE7B7 75%, #A7F3D0 100%);
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-list: rgba(255, 255, 255, 0.9);
+  
+  /* Background Variants */
+  --bg-main-dark: linear-gradient(135deg, #047857 0%, #065F46 25%, #064E3B 50%, #1F2937 75%, #111827 100%);
+  --bg-main-light: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 25%, #A7F3D0 50%, #F9FAFB 75%, #FFFFFF 100%);
+  --bg-main-vibrant: linear-gradient(135deg, #10B981 0%, #92400E 25%, #3B82F6 50%, #059669 75%, #34D399 100%);
+  
+  /* Gentle swaying and organic movements */
+  --animation-duration: 0.4s;
+  --transition-fast: 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-normal: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slow: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  /* Natural shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(16, 185, 129, 0.12), 0 1px 2px 0 rgba(16, 185, 129, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(16, 185, 129, 0.18), 0 2px 4px -1px rgba(16, 185, 129, 0.12);
+  --shadow-lg: 0 10px 15px -3px rgba(16, 185, 129, 0.24), 0 4px 6px -2px rgba(16, 185, 129, 0.15);
+  --shadow-xl: 0 20px 25px -5px rgba(16, 185, 129, 0.3), 0 10px 10px -5px rgba(16, 185, 129, 0.18);
+  
+  /* Friendly rounded letterforms */
+  font-family: 'Inter', 'Nunito', sans-serif;
+  font-weight: 400;
+}
+
+/* Gentle swaying animations */
+[data-theme="totoro"] .theme-card {
+  animation: gentle-sway 8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+[data-theme="totoro"] .theme-card:nth-child(odd) {
+  animation-delay: -2s;
+}
+
+[data-theme="totoro"] .theme-card:nth-child(even) {
+  animation-delay: -4s;
+  animation-direction: reverse;
+}
+
+@keyframes gentle-sway {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(0.5deg) scale(1.002);
+  }
+  75% {
+    transform: rotate(-0.5deg) scale(1.002);
+  }
+}
+
+/* Organic breathing effect for lists */
+[data-theme="totoro"] .theme-list {
+  animation: breathe 10s ease-in-out infinite;
+}
+
+[data-theme="totoro"] .theme-list:nth-child(2n) {
+  animation-delay: -5s;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: var(--shadow-sm);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Natural button effects */
+[data-theme="totoro"] .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="totoro"] .btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+  transform: scale(0);
+  transition: transform var(--transition-normal);
+}
+
+[data-theme="totoro"] .btn-primary:hover::before {
+  transform: scale(2);
+}
+
+/* Forest patterns */
+[data-theme="totoro"] .theme-board {
+  background: var(--bg-main);
+  position: relative;
+}
+
+[data-theme="totoro"] .theme-board::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill-opacity='0.03'%3E%3Ccircle fill='%23059669' cx='30' cy='30' r='8'/%3E%3Cpath fill='%2334D399' d='M0 0h60v60H0z'/%3E%3Ccircle fill='%23059669' cx='0' cy='0' r='18'/%3E%3Ccircle fill='%2334D399' cx='60' cy='60' r='18'/%3E%3C/g%3E%3C/svg%3E");
+  animation: forest-pattern 20s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes forest-pattern {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 60px 60px;
+  }
+}
+
+/* Leaf-like hover effects */
+[data-theme="totoro"] .theme-card:hover {
+  transform: translateY(-2px) rotate(1deg);
+  box-shadow: var(--shadow-lg);
+}
+
+[data-theme="totoro"] .theme-list:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+/* Natural color transitions */
+[data-theme="totoro"] .text-primary {
+  background: linear-gradient(45deg, var(--color-primary), var(--color-primary-light));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+[data-theme="totoro"] .text-secondary {
+  color: var(--color-secondary);
+  text-shadow: 0 1px 2px rgba(146, 64, 14, 0.1);
+}
+
+/* Growth animation for new elements */
+[data-theme="totoro"] .theme-card[data-new],
+[data-theme="totoro"] .theme-list[data-new] {
+  animation: grow-from-seed 0.8s ease-out;
+}
+
+@keyframes grow-from-seed {
+  0% {
+    transform: scale(0) rotate(180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(0.8) rotate(90deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="totoro"] .theme-card,
+  [data-theme="totoro"] .theme-list,
+  [data-theme="totoro"] .theme-board::after {
+    animation: none;
+  }
+  
+  [data-theme="totoro"] .theme-card:hover,
+  [data-theme="totoro"] .theme-list:hover {
+    transform: none;
+  }
+}
+
+/* High contrast adjustments */
+@media (prefers-contrast: high) {
+  [data-theme="totoro"] {
+    --color-primary: #047857;
+    --color-secondary: #78350F;
+    --color-accent: #1D4ED8;
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  }
+}

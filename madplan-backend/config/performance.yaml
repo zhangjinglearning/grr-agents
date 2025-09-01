@@ -1,0 +1,437 @@
+# Performance Configuration for MadPlan Backend
+# Production-grade performance optimizations and caching strategies
+
+# Redis Caching Configuration
+redis:
+  enabled: true
+  host: "${REDIS_HOST:localhost}"
+  port: "${REDIS_PORT:6379}"
+  password: "${REDIS_PASSWORD:}"
+  db: 0
+  keyPrefix: "madplan:"
+  
+  # Connection Pool Settings
+  connectionPool:
+    maxConnections: 20
+    minConnections: 5
+    acquireTimeoutMillis: 30000
+    idleTimeoutMillis: 30000
+    
+  # Cluster Configuration (for production)
+  cluster:
+    enabled: ${REDIS_CLUSTER_ENABLED:false}
+    nodes:
+      - "${REDIS_NODE_1:localhost:7000}"
+      - "${REDIS_NODE_2:localhost:7001}"
+      - "${REDIS_NODE_3:localhost:7002}"
+    options:
+      enableReadyCheck: false
+      redisOptions:
+        password: "${REDIS_PASSWORD:}"
+
+# Caching Strategies
+caching:
+  # Default TTL values (in seconds)
+  defaultTtl: 300  # 5 minutes
+  shortTtl: 60     # 1 minute
+  mediumTtl: 600   # 10 minutes
+  longTtl: 3600    # 1 hour
+  dayTtl: 86400    # 24 hours
+  
+  # Cache Keys and TTL Configuration
+  strategies:
+    # User session caching
+    userSessions:
+      enabled: true
+      ttl: 900  # 15 minutes
+      keyPattern: "session:{sessionId}"
+      
+    # API response caching
+    apiResponses:
+      enabled: true
+      ttl: 300  # 5 minutes
+      keyPattern: "api:{method}:{path}:{query_hash}"
+      excludePaths:
+        - "/auth/*"
+        - "/admin/*"
+        - "/api/health"
+      
+    # Database query caching
+    dbQueries:
+      enabled: true
+      ttl: 600  # 10 minutes
+      keyPattern: "db:{model}:{query_hash}"
+      
+    # Static content caching
+    staticContent:
+      enabled: true
+      ttl: 86400  # 24 hours
+      keyPattern: "static:{path}:{version}"
+      
+    # User profile caching
+    userProfiles:
+      enabled: true
+      ttl: 1800  # 30 minutes
+      keyPattern: "user:{userId}"
+      
+    # Board data caching
+    boardData:
+      enabled: true
+      ttl: 300  # 5 minutes
+      keyPattern: "board:{boardId}"
+      invalidateOnUpdate: true
+      
+    # Authentication token caching
+    authTokens:
+      enabled: true
+      ttl: 900  # 15 minutes (matches JWT expiry)
+      keyPattern: "auth:{tokenHash}"
+
+# Database Optimization
+database:
+  mongodb:
+    # Connection Pool Settings
+    connectionPool:
+      maxPoolSize: 100
+      minPoolSize: 10
+      maxIdleTimeMS: 30000
+      serverSelectionTimeoutMS: 5000
+      socketTimeoutMS: 45000
+      
+    # Read Preference
+    readPreference: "secondaryPreferred"
+    
+    # Write Concern
+    writeConcern:
+      w: "majority"
+      j: true
+      wtimeout: 10000
+      
+    # Connection String Options
+    options:
+      retryWrites: true
+      retryReads: true
+      compressors: "snappy,zlib"
+      
+  # Query Optimization
+  queryOptimization:
+    enabled: true
+    
+    # Index Configuration
+    indexes:
+      # User collection indexes
+      users:
+        - { email: 1 }
+        - { createdAt: 1 }
+        - { lastLoginAt: 1 }
+        - { "profile.preferences.theme": 1 }
+        
+      # Board collection indexes  
+      boards:
+        - { owner: 1, createdAt: -1 }
+        - { isPublic: 1, updatedAt: -1 }
+        - { "tags": 1 }
+        - { owner: 1, title: "text" }
+        
+      # Card collection indexes
+      cards:
+        - { boardId: 1, position: 1 }
+        - { createdBy: 1, createdAt: -1 }
+        - { boardId: 1, updatedAt: -1 }
+        - { title: "text", description: "text" }
+        
+      # Audit log indexes
+      auditLogs:
+        - { userId: 1, timestamp: -1 }
+        - { action: 1, timestamp: -1 }
+        - { resource: 1, timestamp: -1 }
+        - { timestamp: 1 }
+        
+    # Query Monitoring
+    monitoring:
+      enabled: true
+      logSlowQueries: true
+      slowQueryThresholdMs: 100
+      explainQueries: false  # Enable only in development
+      
+    # Aggregation Optimization
+    aggregation:
+      allowDiskUse: true
+      maxTimeMS: 30000
+
+# CDN Configuration
+cdn:
+  enabled: true
+  provider: "cloudfront"
+  baseUrl: "${CDN_BASE_URL:https://cdn.madplan.com}"
+  
+  # Asset Optimization
+  assets:
+    # Image optimization
+    images:
+      formats: ["webp", "avif", "jpg", "png"]
+      qualities: [80, 90, 95]
+      sizes: [150, 300, 600, 1200, 1800]
+      lazyLoading: true
+      
+    # JavaScript optimization
+    javascript:
+      minify: true
+      compress: true
+      bundling: true
+      codesplitting: true
+      
+    # CSS optimization
+    css:
+      minify: true
+      compress: true
+      criticalCss: true
+      
+  # Cache Headers
+  cacheHeaders:
+    static:
+      maxAge: 31536000  # 1 year
+      immutable: true
+      
+    dynamic:
+      maxAge: 300  # 5 minutes
+      staleWhileRevalidate: 60
+      
+    api:
+      maxAge: 60  # 1 minute
+      private: true
+
+# HTTP Optimization
+http:
+  # Compression
+  compression:
+    enabled: true
+    algorithm: "gzip"
+    level: 6
+    threshold: 1024  # bytes
+    
+  # Keep-Alive
+  keepAlive:
+    enabled: true
+    timeout: 65000  # ms
+    maxConnections: 1000
+    
+  # HTTP/2
+  http2:
+    enabled: true
+    serverPush: true
+    
+# API Rate Limiting and Throttling
+apiOptimization:
+  # Request throttling
+  throttling:
+    enabled: true
+    
+    # Rate limits by endpoint type
+    rateLimits:
+      # General API endpoints
+      general:
+        windowMs: 60000  # 1 minute
+        maxRequests: 100
+        
+      # Authentication endpoints
+      auth:
+        windowMs: 300000  # 5 minutes
+        maxRequests: 20
+        
+      # Upload endpoints
+      upload:
+        windowMs: 60000  # 1 minute
+        maxRequests: 10
+        maxSize: "10MB"
+        
+      # Search endpoints
+      search:
+        windowMs: 60000  # 1 minute
+        maxRequests: 30
+        
+  # Response optimization
+  responses:
+    # Pagination
+    pagination:
+      defaultLimit: 20
+      maxLimit: 100
+      
+    # Field selection
+    fieldSelection:
+      enabled: true
+      excludeByDefault: ["__v", "password", "salt"]
+      
+    # Response compression
+    compression:
+      enabled: true
+      minSize: 1024
+
+# Memory Management
+memory:
+  # Garbage Collection
+  gc:
+    # Node.js specific settings
+    maxOldSpaceSize: 4096  # MB
+    maxNewSpaceSize: 1024  # MB
+    
+  # Memory monitoring
+  monitoring:
+    enabled: true
+    alertThreshold: 80  # percent
+    
+  # Object pooling
+  objectPooling:
+    enabled: true
+    maxPoolSize: 1000
+
+# Performance Monitoring
+monitoring:
+  enabled: true
+  
+  # Metrics collection
+  metrics:
+    # Response time metrics
+    responseTime:
+      enabled: true
+      percentiles: [50, 75, 90, 95, 99]
+      
+    # Throughput metrics
+    throughput:
+      enabled: true
+      interval: 60000  # 1 minute
+      
+    # Error rate metrics
+    errorRate:
+      enabled: true
+      threshold: 0.01  # 1%
+      
+    # Cache hit rate metrics
+    cacheHitRate:
+      enabled: true
+      target: 0.8  # 80%
+      
+  # Performance budgets
+  budgets:
+    # API response time budgets (milliseconds)
+    apiResponseTime:
+      p50: 100
+      p90: 300
+      p99: 1000
+      
+    # Database query time budgets
+    dbQueryTime:
+      p50: 50
+      p90: 200
+      p99: 500
+      
+    # Cache response time budgets
+    cacheResponseTime:
+      p50: 5
+      p90: 20
+      p99: 50
+      
+  # Alerting
+  alerts:
+    enabled: true
+    channels: ["sns", "slack"]
+    
+    thresholds:
+      responseTime: 500  # ms
+      errorRate: 0.05    # 5%
+      cpuUsage: 80       # percent
+      memoryUsage: 85    # percent
+      cacheHitRate: 0.7  # 70%
+
+# Background Job Performance
+backgroundJobs:
+  # Queue configuration
+  queue:
+    redis:
+      host: "${REDIS_HOST:localhost}"
+      port: "${REDIS_PORT:6379}"
+      db: 1
+      
+    # Job processing
+    processing:
+      concurrency: 5
+      maxRetries: 3
+      retryDelay: 5000  # ms
+      
+    # Job priorities
+    priorities:
+      critical: 10
+      high: 5
+      normal: 0
+      low: -5
+      
+  # Job optimization
+  optimization:
+    # Batch processing
+    batching:
+      enabled: true
+      batchSize: 100
+      flushInterval: 30000  # ms
+      
+    # Job deduplication
+    deduplication:
+      enabled: true
+      windowMs: 60000  # 1 minute
+
+# Load Testing Configuration
+loadTesting:
+  enabled: false  # Enable only during testing
+  
+  # Test scenarios
+  scenarios:
+    baseline:
+      duration: "5m"
+      users: 100
+      rampUpTime: "30s"
+      
+    stress:
+      duration: "10m"
+      users: 500
+      rampUpTime: "2m"
+      
+    spike:
+      duration: "2m"
+      users: 1000
+      rampUpTime: "10s"
+      
+  # Performance thresholds
+  thresholds:
+    responseTime: 500  # ms
+    errorRate: 0.01    # 1%
+    throughput: 100    # requests per second
+
+# Environment-Specific Overrides
+environments:
+  production:
+    redis:
+      cluster:
+        enabled: true
+    database:
+      mongodb:
+        connectionPool:
+          maxPoolSize: 200
+    monitoring:
+      alerts:
+        enabled: true
+        
+  staging:
+    caching:
+      defaultTtl: 60  # Shorter TTL for testing
+    monitoring:
+      alerts:
+        enabled: false
+        
+  development:
+    caching:
+      enabled: false
+    monitoring:
+      enabled: false
+    database:
+      queryOptimization:
+        monitoring:
+          explainQueries: true

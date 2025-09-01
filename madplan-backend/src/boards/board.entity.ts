@@ -1,8 +1,10 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Types } from "mongoose";
 import { Field, ID, ObjectType } from "@nestjs/graphql";
-import { IsString, IsNotEmpty, IsArray } from "class-validator";
+import { IsString, IsNotEmpty, IsArray, ValidateNested, IsOptional } from "class-validator";
+import { Type } from "class-transformer";
 import { List } from "./list.entity";
+import { BoardTheme } from "../themes/theme.entity";
 
 export type BoardDocument = Board & Document;
 
@@ -42,6 +44,17 @@ export class Board {
   @Field(() => [ID])
   @IsArray()
   listOrder: string[];
+
+  @Prop({ 
+    type: BoardTheme,
+    required: false,
+    default: () => ({ themeId: "spirited-away" }) // Default theme
+  })
+  @Field(() => BoardTheme, { nullable: true })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BoardTheme)
+  theme?: BoardTheme;
 
   // Virtual field for lists relationship - populated at runtime
   @Field(() => [List])

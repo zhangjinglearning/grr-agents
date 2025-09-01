@@ -1,0 +1,350 @@
+# Production Environment Configuration
+# MadPlan Backend - Studio Ghibli Kanban Board
+
+app:
+  name: 'MadPlan Backend'
+  version: '${APP_VERSION}'
+  environment: 'production'
+  port: '${PORT}'
+  host: '0.0.0.0'
+  
+  # Production settings
+  debug: false
+  enableGraphQLPlayground: false
+  enableIntrospection: false
+  logLevel: 'warn'
+  enableCors: true
+
+# Database configuration
+database:
+  uri: '${MONGODB_URI}'
+  options:
+    useNewUrlParser: true
+    useUnifiedTopology: true
+    serverSelectionTimeoutMS: 30000
+    socketTimeoutMS: 45000
+    family: 4
+    # Production-optimized settings
+    maxPoolSize: 50
+    minPoolSize: 10
+    maxIdleTimeMS: 300000
+    waitQueueTimeoutMS: 10000
+    retryWrites: true
+    readPreference: 'primaryPreferred'
+    readConcern: 'majority'
+    writeConcern:
+      w: 'majority'
+      j: true
+
+# Authentication & Security
+auth:
+  jwtSecret: '${JWT_SECRET}'
+  jwtExpiresIn: '15m'
+  refreshTokenExpiresIn: '7d'
+  bcryptRounds: 14
+  
+  # Production security settings
+  enableTestAccounts: false
+  requireEmailVerification: true
+  sessionTimeout: '15m'
+  maxLoginAttempts: 5
+  lockoutDuration: 300000  # 5 minutes
+
+# Redis Cache
+redis:
+  enabled: true
+  url: '${REDIS_URL}'
+  keyPrefix: 'madplan:prod:'
+  
+  # Production cache settings
+  defaultTTL: 3600
+  sessionTTL: 3600
+  queryTTL: 300
+  
+  # Connection pool
+  maxRetriesPerRequest: 3
+  retryDelayOnFailover: 100
+  lazyConnect: true
+
+# CORS Configuration
+cors:
+  origins: 
+    - '${FRONTEND_URL}'
+    - 'https://grr-agents.vercel.app'
+  credentials: true
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+  allowedHeaders: ['Content-Type', 'Authorization']
+  maxAge: 86400  # 24 hours
+
+# GraphQL Configuration
+graphql:
+  path: '/graphql'
+  playground: false
+  introspection: false
+  tracing: false
+  cacheControl: true
+  uploads: true
+  context:
+    includeRequestInContext: false
+    enableResponseLogging: false
+  
+  # Query limits
+  depthLimit: 10
+  queryComplexity:
+    maximumComplexity: 1000
+    scalarCost: 1
+    objectCost: 2
+    listFactor: 10
+
+# Logging Configuration
+logging:
+  level: 'warn'
+  format: 'json'
+  enableFileLogging: true
+  enableConsoleLogging: true
+  
+  # Production logging
+  enableSQLLogging: false
+  enableGraphQLLogging: false
+  enablePerformanceLogging: true
+  enableSecurityLogging: true
+  
+  # Log rotation
+  fileRotation:
+    maxFiles: 30
+    maxSize: '50m'
+  
+  # Structured logging
+  structured: true
+  includeTimestamp: true
+  includeLevel: true
+  includeRequestId: true
+
+# File Upload Configuration
+upload:
+  maxFileSize: 5242880  # 5MB
+  allowedMimeTypes:
+    - 'image/jpeg'
+    - 'image/png'
+    - 'image/webp'
+  destination: '${UPLOAD_DESTINATION}'
+  
+  # Security scanning
+  virusScanning: true
+  contentValidation: true
+
+# Email Configuration
+email:
+  enabled: true
+  provider: 'sendgrid'
+  apiKey: '${SENDGRID_API_KEY}'
+  from: 'noreply@madplan.com'
+  templates:
+    welcome: 'production-welcome-template'
+    passwordReset: 'production-password-reset-template'
+    emailVerification: 'production-email-verification-template'
+  
+  # Rate limiting
+  dailyLimit: 10000
+  hourlyLimit: 500
+
+# Feature Flags
+features:
+  enableAnalytics: true
+  enableCollaboration: true
+  enableNotifications: true
+  enableAdvancedFeatures: true
+  enablePerformanceMonitoring: true
+  
+  # Production-specific features
+  enableSeeding: false
+  enableTestData: false
+  enableDebugEndpoints: false
+
+# Rate Limiting
+rateLimit:
+  windowMs: 900000  # 15 minutes
+  max: 100  # requests per windowMs per IP
+  skipSuccessfulRequests: false
+  skipFailedRequests: false
+  
+  # Stricter per-endpoint limits
+  auth:
+    windowMs: 900000
+    max: 5  # 5 login attempts per 15 minutes
+  upload:
+    windowMs: 3600000
+    max: 20  # 20 uploads per hour
+  api:
+    windowMs: 60000
+    max: 60  # 60 requests per minute
+
+# Health Check Configuration
+healthCheck:
+  enabled: true
+  path: '/api/health'
+  includeDatabase: true
+  includeRedis: true
+  timeout: 5000
+  
+  # Security
+  enableDetailedResponse: false  # Don't expose internal details
+
+# Security Configuration
+security:
+  helmet:
+    contentSecurityPolicy:
+      directives:
+        defaultSrc: ["'none'"]
+        imgSrc: ["'self'", "data:", "https://cdn.madplan.com"]
+        scriptSrc: ["'self'"]
+        styleSrc: ["'self'", "'unsafe-inline'"]
+        fontSrc: ["'self'", "https://fonts.gstatic.com"]
+        connectSrc: ["'self'"]
+        frameSrc: ["'none'"]
+        objectSrc: ["'none'"]
+        upgradeInsecureRequests: []
+    
+  # HTTPS enforcement
+  trustProxy: true
+  requireHttps: true
+  
+  # Security headers
+  headers:
+    enableXSS: true
+    enableFrameGuard: true
+    enableContentTypeNoSniff: true
+    enableReferrerPolicy: true
+    enablePermittedCrossDomainPolicies: false
+  
+  # Additional security
+  enableHSTS: true
+  hstsMaxAge: 31536000  # 1 year
+  includeHSTSSubDomains: true
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+  
+  # APM Configuration
+  apm:
+    enabled: true
+    serviceName: 'madplan-backend'
+    environment: 'production'
+    sampleRate: 0.1  # Sample 10% for performance
+    
+  # Metrics
+  metrics:
+    enabled: true
+    path: '/metrics'
+    collectDefaultMetrics: true
+    collectGCMetrics: true
+    collectHttpMetrics: true
+    
+  # Health monitoring
+  healthChecks:
+    database: true
+    redis: true
+    external: true
+    interval: 30000  # 30 seconds
+  
+  # Alerting thresholds
+  alerts:
+    errorRate: 0.05  # 5% error rate
+    responseTime: 5000  # 5 second response time
+    memoryUsage: 0.8  # 80% memory usage
+    cpuUsage: 0.8  # 80% CPU usage
+
+# Backup Configuration
+backup:
+  enabled: true
+  schedule: '0 3 * * *'  # Daily at 3 AM
+  retention: 30  # Keep 30 days
+  destination: '${BACKUP_DESTINATION}'
+  encryption: true
+  compression: true
+
+# Performance Configuration
+performance:
+  # Query optimization
+  queryTimeout: 10000  # 10 seconds
+  maxQueryDepth: 10
+  maxQueryComplexity: 1000
+  
+  # Connection pooling
+  database:
+    maxConnections: 50
+    minConnections: 10
+    acquireTimeoutMillis: 10000
+    idleTimeoutMillis: 300000
+  
+  # Caching strategies
+  caching:
+    enableQueryCache: true
+    enableResultCache: true
+    cacheSize: '100mb'
+    cacheTTL: 3600
+
+# Error Tracking
+errorTracking:
+  enabled: true
+  dsn: '${SENTRY_DSN}'
+  environment: 'production'
+  sampleRate: 0.1  # Sample 10% for performance
+  includeRequestData: false  # Don't include sensitive data
+  includeUserContext: false
+  
+  # Error filtering
+  ignoreErrors:
+    - 'GraphQLError: Syntax Error'
+    - 'ValidationError'
+    - 'Non-Error promise rejection captured'
+  
+  # Performance monitoring
+  tracesSampleRate: 0.01  # 1% tracing for performance
+
+# CDN Configuration
+cdn:
+  enabled: true
+  baseUrl: '${CDN_BASE_URL}'
+  regions:
+    - 'us-east-1'
+    - 'eu-west-1'
+    - 'ap-southeast-1'
+  
+  # Cache settings
+  staticAssets:
+    maxAge: 31536000  # 1 year
+    immutable: true
+  
+  api:
+    maxAge: 300  # 5 minutes
+    staleWhileRevalidate: 600  # 10 minutes
+
+# Analytics Configuration
+analytics:
+  enabled: true
+  provider: 'mixpanel'
+  apiKey: '${MIXPANEL_API_KEY}'
+  trackingOptions:
+    trackPageViews: true
+    trackUserActions: true
+    trackErrors: false  # Don't track sensitive error data
+    
+  # Data retention
+  dataRetention: 365  # 1 year
+
+# Compliance Configuration
+compliance:
+  gdpr:
+    enabled: true
+    dataRetention: 730  # 2 years
+    enableDataExport: true
+    enableDataDeletion: true
+    
+  # Audit logging
+  auditLogging:
+    enabled: true
+    includeUserActions: true
+    includeDataAccess: true
+    retention: 2555  # 7 years

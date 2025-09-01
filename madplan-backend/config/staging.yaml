@@ -1,0 +1,225 @@
+# Staging Environment Configuration
+# MadPlan Backend - Studio Ghibli Kanban Board
+
+app:
+  name: 'MadPlan Backend (Staging)'
+  version: '${APP_VERSION}'
+  environment: 'staging'
+  port: '${PORT}'
+  host: '0.0.0.0'
+  
+  # Staging-specific settings
+  debug: false
+  enableGraphQLPlayground: true
+  enableIntrospection: true
+  logLevel: 'info'
+  enableCors: true
+
+# Database configuration
+database:
+  uri: '${MONGODB_URI}'
+  options:
+    useNewUrlParser: true
+    useUnifiedTopology: true
+    serverSelectionTimeoutMS: 30000
+    socketTimeoutMS: 45000
+    family: 4
+    # Staging-optimized settings
+    maxPoolSize: 20
+    minPoolSize: 5
+    maxIdleTimeMS: 300000
+    waitQueueTimeoutMS: 10000
+    retryWrites: true
+    readPreference: 'primaryPreferred'
+
+# Authentication & Security
+auth:
+  jwtSecret: '${JWT_SECRET}'
+  jwtExpiresIn: '1h'
+  refreshTokenExpiresIn: '7d'
+  bcryptRounds: 12
+  
+  # Staging security settings
+  enableTestAccounts: true
+  requireEmailVerification: false
+  sessionTimeout: '2h'
+
+# Redis Cache
+redis:
+  enabled: true
+  url: '${REDIS_URL}'
+  keyPrefix: 'madplan:staging:'
+  
+  # Cache TTL settings
+  defaultTTL: 3600
+  sessionTTL: 7200
+  queryTTL: 300
+
+# CORS Configuration
+cors:
+  origins: 
+    - '${FRONTEND_URL}'
+    - 'https://grr-agents-staging.vercel.app'
+    - 'https://grr-agents.vercel.app'
+  credentials: true
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-apollo-tracing']
+
+# GraphQL Configuration
+graphql:
+  path: '/graphql'
+  playground: true
+  introspection: true
+  tracing: true
+  cacheControl: true
+  uploads: true
+  context:
+    includeRequestInContext: false
+    enableResponseLogging: true
+
+# Logging Configuration
+logging:
+  level: 'info'
+  format: 'json'
+  enableFileLogging: true
+  enableConsoleLogging: true
+  
+  # Staging logging
+  enableSQLLogging: false
+  enableGraphQLLogging: true
+  enablePerformanceLogging: true
+  
+  # Log rotation
+  fileRotation:
+    maxFiles: 10
+    maxSize: '10m'
+
+# File Upload Configuration
+upload:
+  maxFileSize: 10485760  # 10MB
+  allowedMimeTypes:
+    - 'image/jpeg'
+    - 'image/png'
+    - 'image/gif'
+    - 'image/webp'
+  destination: './uploads/staging'
+
+# Email Configuration
+email:
+  enabled: true
+  provider: 'sendgrid'
+  apiKey: '${SENDGRID_API_KEY}'
+  from: 'noreply@staging.madplan.com'
+  templates:
+    welcome: 'staging-welcome-template'
+    passwordReset: 'staging-password-reset-template'
+
+# Feature Flags
+features:
+  enableAnalytics: true
+  enableCollaboration: true
+  enableNotifications: true
+  enableAdvancedFeatures: true
+  enablePerformanceMonitoring: true
+  
+  # Staging-specific features
+  enableSeeding: false
+  enableTestData: true
+  enableDebugEndpoints: true
+
+# Rate Limiting
+rateLimit:
+  windowMs: 900000  # 15 minutes
+  max: 500  # requests per windowMs
+  skipSuccessfulRequests: false
+  skipFailedRequests: false
+  
+  # Per-endpoint limits
+  auth:
+    windowMs: 900000
+    max: 10  # 10 login attempts per 15 minutes
+  upload:
+    windowMs: 3600000
+    max: 100  # 100 uploads per hour
+
+# Health Check Configuration
+healthCheck:
+  enabled: true
+  path: '/api/health'
+  includeDatabase: true
+  includeRedis: true
+  timeout: 10000
+
+# Security Configuration
+security:
+  helmet:
+    contentSecurityPolicy:
+      directives:
+        defaultSrc: ["'self'"]
+        imgSrc: ["'self'", "data:", "https:"]
+        scriptSrc: ["'self'"]
+        styleSrc: ["'self'", "'unsafe-inline'"]
+    
+  # HTTPS enforcement
+  trustProxy: true
+  requireHttps: true
+  
+  # Security headers
+  headers:
+    enableXSS: true
+    enableFrameGuard: true
+    enableContentTypeNoSniff: true
+    enableReferrerPolicy: true
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+  
+  # APM Configuration
+  apm:
+    enabled: true
+    serviceName: 'madplan-backend-staging'
+    environment: 'staging'
+    
+  # Metrics
+  metrics:
+    enabled: true
+    path: '/metrics'
+    collectDefaultMetrics: true
+    
+  # Health monitoring
+  healthChecks:
+    database: true
+    redis: true
+    external: true
+    interval: 30000  # 30 seconds
+
+# Backup Configuration
+backup:
+  enabled: true
+  schedule: '0 2 * * *'  # Daily at 2 AM
+  retention: 7  # Keep 7 days
+  destination: '${BACKUP_DESTINATION}'
+
+# Performance Configuration
+performance:
+  # Query optimization
+  queryTimeout: 30000
+  maxQueryDepth: 10
+  maxQueryComplexity: 1000
+  
+  # Connection pooling
+  database:
+    maxConnections: 20
+    minConnections: 5
+    acquireTimeoutMillis: 30000
+    idleTimeoutMillis: 300000
+
+# Error Tracking
+errorTracking:
+  enabled: true
+  dsn: '${SENTRY_DSN}'
+  environment: 'staging'
+  sampleRate: 0.5
+  includeRequestData: true
+  includeUserContext: true

@@ -5,14 +5,19 @@ import { Model } from "mongoose";
 import { BoardsService } from "./boards.service";
 import { Board, BoardDocument } from "./board.entity";
 import { List, ListDocument } from "./list.entity";
+import { Card, CardDocument } from "./card.entity";
 import { CreateListInput } from "./dto/create-list.dto";
 import { UpdateListInput } from "./dto/update-list.dto";
 import { ReorderListInput } from "./dto/reorder-list.dto";
+import { CreateCardInput } from "./dto/create-card.dto";
+import { UpdateCardInput } from "./dto/update-card.dto";
+import { ReorderCardInput } from "./dto/reorder-card.dto";
 
 describe("BoardsService", () => {
   let service: BoardsService;
   let boardModel: Model<BoardDocument>;
   let listModel: Model<ListDocument>;
+  let cardModel: Model<CardDocument>;
 
   // Mock board data
   const mockUserId = "507f1f77bcf86cd799439011";
@@ -20,6 +25,8 @@ describe("BoardsService", () => {
   const mockBoardId = "507f1f77bcf86cd799439033";
   const mockListId = "507f1f77bcf86cd799439044";
   const mockListId2 = "507f1f77bcf86cd799439055";
+  const mockCardId = "507f1f77bcf86cd799439066";
+  const mockCardId2 = "507f1f77bcf86cd799439077";
 
   const mockBoard = {
     id: mockBoardId,
@@ -56,6 +63,30 @@ describe("BoardsService", () => {
     updatedAt: new Date(),
   };
 
+  // Mock card data
+  const mockCard = {
+    id: mockCardId,
+    content: "Test Card",
+    listId: mockListId,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const mockCard2 = {
+    id: mockCardId2,
+    content: "Test Card 2",
+    listId: mockListId,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const mockCardDocument = {
+    ...mockCard,
+    _id: mockCardId,
+    save: jest.fn(),
+    toObject: jest.fn().mockReturnValue(mockCard),
+  };
+
   const mockListDocument = {
     ...mockList,
     _id: mockListId,
@@ -83,6 +114,20 @@ describe("BoardsService", () => {
     find: jest.fn(),
     findById: jest.fn(),
     findByIdAndDelete: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    exec: jest.fn(),
+  };
+
+  // Mock card model
+  const mockCardModel = {
+    new: jest.fn(),
+    constructor: jest.fn(),
+    find: jest.fn(),
+    findById: jest.fn(),
+    findByIdAndDelete: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
     exec: jest.fn(),
@@ -100,12 +145,17 @@ describe("BoardsService", () => {
           provide: getModelToken(List.name),
           useValue: mockListModel,
         },
+        {
+          provide: getModelToken(Card.name),
+          useValue: mockCardModel,
+        },
       ],
     }).compile();
 
     service = module.get<BoardsService>(BoardsService);
     boardModel = module.get<Model<BoardDocument>>(getModelToken(Board.name));
     listModel = module.get<Model<ListDocument>>(getModelToken(List.name));
+    cardModel = module.get<Model<CardDocument>>(getModelToken(Card.name));
 
     // Reset mocks
     jest.clearAllMocks();
@@ -594,6 +644,359 @@ describe("BoardsService", () => {
         service.reorderList(invalidReorderInput, mockUserId),
       ).rejects.toThrow(BadRequestException);
     });
+
+    // Additional reorderList tests for comprehensive coverage
+
+    describe("list reordering scenarios", () => {
+      it("should successfully reorder list to beginning of board", async () => {
+        // Arrange
+        const boardWithLists = {
+          ...mockBoard,
+          listOrder: [mockListId2, mockListId, "list3"],
+        };
+
+        const reorderInput: ReorderListInput = {
+          listId: mockListId,
+          newIndex: 0,
+        };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(boardWithLists),
+        });
+
+        const expectedReorderedBoard = {
+          ...boardWithLists,
+          listOrder: [mockListId, mockListId2, "list3"],
+        };
+
+        mockBoardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(expectedReorderedBoard),
+        });
+
+        // Act
+        const result = await service.reorderList(reorderInput, mockUserId);
+
+        // Assert
+        expect(result).toBeDefined();
+        expect(mockBoardModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockBoardId,
+          { listOrder: [mockListId, mockListId2, "list3"] },
+          { new: true }
+        );
+      });
+
+      it("should successfully reorder list to end of board", async () => {
+        // Arrange
+        const boardWithLists = {
+          ...mockBoard,
+          listOrder: [mockListId, mockListId2, "list3"],
+        };
+
+        const reorderInput: ReorderListInput = {
+          listId: mockListId,
+          newIndex: 2,
+        };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(boardWithLists),
+        });
+
+        const expectedReorderedBoard = {
+          ...boardWithLists,
+          listOrder: [mockListId2, "list3", mockListId],
+        };
+
+        mockBoardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(expectedReorderedBoard),
+        });
+
+        // Act
+        const result = await service.reorderList(reorderInput, mockUserId);
+
+        // Assert
+        expect(result).toBeDefined();
+        expect(mockBoardModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockBoardId,
+          { listOrder: [mockListId2, "list3", mockListId] },
+          { new: true }
+        );
+      });
+
+      it("should successfully reorder list to middle position", async () => {
+        // Arrange
+        const boardWithLists = {
+          ...mockBoard,
+          listOrder: [mockListId, mockListId2, "list3", "list4"],
+        };
+
+        const reorderInput: ReorderListInput = {
+          listId: "list4",
+          newIndex: 1,
+        };
+
+        const mockList4 = { ...mockList, id: "list4", boardId: mockBoardId };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList4),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(boardWithLists),
+        });
+
+        const expectedReorderedBoard = {
+          ...boardWithLists,
+          listOrder: [mockListId, "list4", mockListId2, "list3"],
+        };
+
+        mockBoardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(expectedReorderedBoard),
+        });
+
+        // Act
+        const result = await service.reorderList(reorderInput, mockUserId);
+
+        // Assert
+        expect(result).toBeDefined();
+        expect(mockBoardModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockBoardId,
+          { listOrder: [mockListId, "list4", mockListId2, "list3"] },
+          { new: true }
+        );
+      });
+    });
+
+    describe("authorization and ownership validation", () => {
+      it("should throw ForbiddenException when user does not own board", async () => {
+        // Arrange
+        const boardWithLists = {
+          ...mockBoard,
+          ownerId: mockOtherUserId, // Different user
+          listOrder: [mockListId],
+        };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(boardWithLists),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderList(reorderInput, mockUserId),
+        ).rejects.toThrow(ForbiddenException);
+      });
+
+      it("should throw NotFoundException when board does not exist", async () => {
+        // Arrange
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(null),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderList(reorderInput, mockUserId),
+        ).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    describe("edge cases and validation", () => {
+      it("should handle single list board reordering (no-op)", async () => {
+        // Arrange
+        const singleListBoard = {
+          ...mockBoard,
+          listOrder: [mockListId],
+        };
+
+        const reorderInput: ReorderListInput = {
+          listId: mockListId,
+          newIndex: 0,
+        };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(singleListBoard),
+        });
+
+        mockBoardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(singleListBoard),
+        });
+
+        // Act
+        const result = await service.reorderList(reorderInput, mockUserId);
+
+        // Assert
+        expect(result).toBeDefined();
+        expect(mockBoardModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockBoardId,
+          { listOrder: [mockListId] },
+          { new: true }
+        );
+      });
+
+      it("should throw BadRequestException when newIndex is negative", async () => {
+        // Arrange
+        const boardWithLists = {
+          ...mockBoard,
+          listOrder: [mockListId, mockListId2],
+        };
+
+        const invalidReorderInput: ReorderListInput = {
+          listId: mockListId,
+          newIndex: -1,
+        };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(boardWithLists),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderList(invalidReorderInput, mockUserId),
+        ).rejects.toThrow(BadRequestException);
+        expect(mockBoardModel.findByIdAndUpdate).not.toHaveBeenCalled();
+      });
+
+      it("should handle empty board gracefully", async () => {
+        // Arrange
+        const emptyBoard = {
+          ...mockBoard,
+          listOrder: [],
+        };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(emptyBoard),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderList(reorderInput, mockUserId),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it("should validate that reordered list belongs to correct board", async () => {
+        // Arrange
+        const wrongBoardList = {
+          ...mockList,
+          boardId: "different-board-id",
+        };
+
+        const boardWithLists = {
+          ...mockBoard,
+          listOrder: [mockListId],
+        };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(wrongBoardList),
+        });
+
+        mockBoardModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockRejectedValue(new NotFoundException("Board not found")),
+          })
+          .mockReturnValue({
+            exec: jest.fn().mockResolvedValue(boardWithLists),
+          });
+
+        // Act & Assert
+        await expect(
+          service.reorderList(reorderInput, mockUserId),
+        ).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    describe("data consistency and atomic operations", () => {
+      it("should maintain listOrder array integrity during reordering", async () => {
+        // Arrange
+        const boardWithManyLists = {
+          ...mockBoard,
+          listOrder: ["list1", "list2", mockListId, "list4", "list5"],
+        };
+
+        const reorderInput: ReorderListInput = {
+          listId: mockListId,
+          newIndex: 1,
+        };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(boardWithManyLists),
+        });
+
+        const expectedReorderedBoard = {
+          ...boardWithManyLists,
+          listOrder: ["list1", mockListId, "list2", "list4", "list5"],
+        };
+
+        mockBoardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(expectedReorderedBoard),
+        });
+
+        // Act
+        const result = await service.reorderList(reorderInput, mockUserId);
+
+        // Assert
+        expect(result).toBeDefined();
+        expect(mockBoardModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockBoardId,
+          { listOrder: ["list1", mockListId, "list2", "list4", "list5"] },
+          { new: true }
+        );
+      });
+
+      it("should handle database update failures gracefully", async () => {
+        // Arrange
+        const boardWithLists = {
+          ...mockBoard,
+          listOrder: [mockListId, mockListId2],
+        };
+
+        mockListModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockList),
+        });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(boardWithLists),
+        });
+
+        mockBoardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockRejectedValue(new Error("Database update failed")),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderList(reorderInput, mockUserId),
+        ).rejects.toThrow("Database update failed");
+      });
+    });
   });
 
   describe("getListsByBoard", () => {
@@ -646,6 +1049,670 @@ describe("BoardsService", () => {
       await expect(
         service.getListsByBoard(mockBoardId, mockUserId),
       ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  // ==================== Card Operations Tests ====================
+
+  describe("reorderCard", () => {
+    const reorderCardInput: ReorderCardInput = {
+      cardId: mockCardId,
+      sourceListId: mockListId,
+      destListId: mockListId,
+      newIndex: 1,
+    };
+
+    beforeEach(() => {
+      // Reset mocks before each test
+      jest.clearAllMocks();
+    });
+
+    describe("card reordering within same list", () => {
+      it("should successfully reorder a card within the same list", async () => {
+        // Arrange
+        const listWithCards = {
+          ...mockList,
+          cardOrder: [mockCardId, mockCardId2],
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithCards),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithCards),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        mockListModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue({
+            ...listWithCards,
+            cardOrder: [mockCardId2, mockCardId],
+          }),
+        });
+
+        // Act
+        const result = await service.reorderCard(reorderCardInput, mockUserId);
+
+        // Assert
+        expect(result).toEqual(mockBoard);
+        expect(mockCardModel.findById).toHaveBeenCalledWith(mockCardId);
+        expect(mockListModel.findById).toHaveBeenCalledWith(mockListId);
+        expect(mockListModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockListId,
+          { cardOrder: [mockCardId2, mockCardId] },
+          { new: true }
+        );
+      });
+
+      it("should handle reordering to index 0 within same list", async () => {
+        // Arrange
+        const listWithCards = {
+          ...mockList,
+          cardOrder: [mockCardId2, mockCardId],
+        };
+
+        const reorderToStartInput: ReorderCardInput = {
+          cardId: mockCardId,
+          sourceListId: mockListId,
+          destListId: mockListId,
+          newIndex: 0,
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithCards),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithCards),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        mockListModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue({
+            ...listWithCards,
+            cardOrder: [mockCardId, mockCardId2],
+          }),
+        });
+
+        // Act
+        const result = await service.reorderCard(reorderToStartInput, mockUserId);
+
+        // Assert
+        expect(result).toEqual(mockBoard);
+        expect(mockListModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockListId,
+          { cardOrder: [mockCardId, mockCardId2] },
+          { new: true }
+        );
+      });
+
+      it("should handle single card list reordering", async () => {
+        // Arrange
+        const listWithSingleCard = {
+          ...mockList,
+          cardOrder: [mockCardId],
+        };
+
+        const reorderSingleInput: ReorderCardInput = {
+          cardId: mockCardId,
+          sourceListId: mockListId,
+          destListId: mockListId,
+          newIndex: 0,
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithSingleCard),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithSingleCard),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        mockListModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(listWithSingleCard),
+        });
+
+        // Act
+        const result = await service.reorderCard(reorderSingleInput, mockUserId);
+
+        // Assert
+        expect(result).toEqual(mockBoard);
+        expect(mockListModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockListId,
+          { cardOrder: [mockCardId] },
+          { new: true }
+        );
+      });
+    });
+
+    describe("card movement between different lists", () => {
+      it("should successfully move a card to a different list", async () => {
+        // Arrange
+        const sourceListWithCards = {
+          ...mockList,
+          cardOrder: [mockCardId, mockCardId2],
+        };
+
+        const destListWithCards = {
+          ...mockList2,
+          cardOrder: [],
+        };
+
+        const moveCardInput: ReorderCardInput = {
+          cardId: mockCardId,
+          sourceListId: mockListId,
+          destListId: mockListId2,
+          newIndex: 0,
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(sourceListWithCards),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(destListWithCards),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        mockCardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue({
+            ...mockCard,
+            listId: mockListId2,
+          }),
+        });
+
+        mockListModel.findByIdAndUpdate
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue({
+              ...sourceListWithCards,
+              cardOrder: [mockCardId2],
+            }),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue({
+              ...destListWithCards,
+              cardOrder: [mockCardId],
+            }),
+          });
+
+        // Act
+        const result = await service.reorderCard(moveCardInput, mockUserId);
+
+        // Assert
+        expect(result).toEqual(mockBoard);
+        expect(mockCardModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockCardId,
+          { listId: mockListId2 },
+          { new: true }
+        );
+        expect(mockListModel.findByIdAndUpdate).toHaveBeenCalledTimes(2);
+      });
+
+      it("should move card to non-empty destination list at specific index", async () => {
+        // Arrange
+        const sourceListWithCards = {
+          ...mockList,
+          cardOrder: [mockCardId, mockCardId2],
+        };
+
+        const destListWithCards = {
+          ...mockList2,
+          cardOrder: ["existing-card-1", "existing-card-2"],
+        };
+
+        const moveCardInput: ReorderCardInput = {
+          cardId: mockCardId,
+          sourceListId: mockListId,
+          destListId: mockListId2,
+          newIndex: 1,
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(sourceListWithCards),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(destListWithCards),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        mockCardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue({
+            ...mockCard,
+            listId: mockListId2,
+          }),
+        });
+
+        mockListModel.findByIdAndUpdate
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue({
+              ...sourceListWithCards,
+              cardOrder: [mockCardId2],
+            }),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue({
+              ...destListWithCards,
+              cardOrder: ["existing-card-1", mockCardId, "existing-card-2"],
+            }),
+          });
+
+        // Act
+        const result = await service.reorderCard(moveCardInput, mockUserId);
+
+        // Assert
+        expect(result).toEqual(mockBoard);
+        expect(mockListModel.findByIdAndUpdate).toHaveBeenNthCalledWith(
+          2,
+          mockListId2,
+          { cardOrder: ["existing-card-1", mockCardId, "existing-card-2"] },
+          { new: true }
+        );
+      });
+    });
+
+    describe("error scenarios", () => {
+      it("should throw NotFoundException when card does not exist", async () => {
+        // Arrange
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(null),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderCard(reorderCardInput, mockUserId),
+        ).rejects.toThrow(NotFoundException);
+        expect(mockCardModel.findById).toHaveBeenCalledWith(mockCardId);
+      });
+
+      it("should throw BadRequestException when card does not belong to source list", async () => {
+        // Arrange
+        const cardInDifferentList = {
+          ...mockCard,
+          listId: "different-list-id",
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(cardInDifferentList),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderCard(reorderCardInput, mockUserId),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it("should throw NotFoundException when source list does not exist", async () => {
+        // Arrange
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById.mockReturnValueOnce({
+          exec: jest.fn().mockResolvedValue(null),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderCard(reorderCardInput, mockUserId),
+        ).rejects.toThrow(NotFoundException);
+      });
+
+      it("should throw NotFoundException when destination list does not exist", async () => {
+        // Arrange
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(mockList),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(null),
+          });
+
+        // Act & Assert
+        await expect(
+          service.reorderCard(reorderCardInput, mockUserId),
+        ).rejects.toThrow(NotFoundException);
+      });
+
+      it("should throw BadRequestException when lists belong to different boards", async () => {
+        // Arrange
+        const listInDifferentBoard = {
+          ...mockList2,
+          boardId: "different-board-id",
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(mockList),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listInDifferentBoard),
+          });
+
+        // Act & Assert
+        await expect(
+          service.reorderCard(reorderCardInput, mockUserId),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it("should throw ForbiddenException when user does not own the board", async () => {
+        // Arrange
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(mockList),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(mockList2),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue({
+            ...mockBoard,
+            ownerId: mockOtherUserId,
+          }),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderCard(reorderCardInput, mockUserId),
+        ).rejects.toThrow(ForbiddenException);
+      });
+
+      it("should throw BadRequestException when newIndex is negative", async () => {
+        // Arrange
+        const invalidIndexInput: ReorderCardInput = {
+          cardId: mockCardId,
+          sourceListId: mockListId,
+          destListId: mockListId,
+          newIndex: -1,
+        };
+
+        const listWithCards = {
+          ...mockList,
+          cardOrder: [mockCardId, mockCardId2],
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithCards),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithCards),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderCard(invalidIndexInput, mockUserId),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it("should throw BadRequestException when newIndex is out of bounds", async () => {
+        // Arrange
+        const invalidIndexInput: ReorderCardInput = {
+          cardId: mockCardId,
+          sourceListId: mockListId,
+          destListId: mockListId,
+          newIndex: 5,
+        };
+
+        const listWithCards = {
+          ...mockList,
+          cardOrder: [mockCardId, mockCardId2],
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithCards),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithCards),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderCard(invalidIndexInput, mockUserId),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it("should throw BadRequestException when card is not in source list cardOrder", async () => {
+        // Arrange
+        const listWithoutCard = {
+          ...mockList,
+          cardOrder: [mockCardId2], // Card is not in cardOrder
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithoutCard),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(listWithoutCard),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        // Act & Assert
+        await expect(
+          service.reorderCard(reorderCardInput, mockUserId),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe("edge cases and data consistency", () => {
+      it("should handle empty destination list", async () => {
+        // Arrange
+        const sourceListWithCard = {
+          ...mockList,
+          cardOrder: [mockCardId],
+        };
+
+        const emptyDestList = {
+          ...mockList2,
+          cardOrder: [],
+        };
+
+        const moveToEmptyListInput: ReorderCardInput = {
+          cardId: mockCardId,
+          sourceListId: mockListId,
+          destListId: mockListId2,
+          newIndex: 0,
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(sourceListWithCard),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(emptyDestList),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        mockCardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue({
+            ...mockCard,
+            listId: mockListId2,
+          }),
+        });
+
+        mockListModel.findByIdAndUpdate
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue({
+              ...sourceListWithCard,
+              cardOrder: [],
+            }),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue({
+              ...emptyDestList,
+              cardOrder: [mockCardId],
+            }),
+          });
+
+        // Act
+        const result = await service.reorderCard(moveToEmptyListInput, mockUserId);
+
+        // Assert
+        expect(result).toEqual(mockBoard);
+        expect(mockListModel.findByIdAndUpdate).toHaveBeenNthCalledWith(
+          1,
+          mockListId,
+          { cardOrder: [] },
+          { new: true }
+        );
+        expect(mockListModel.findByIdAndUpdate).toHaveBeenNthCalledWith(
+          2,
+          mockListId2,
+          { cardOrder: [mockCardId] },
+          { new: true }
+        );
+      });
+
+      it("should validate newIndex is within destination list bounds for inter-list moves", async () => {
+        // Arrange
+        const sourceListWithCards = {
+          ...mockList,
+          cardOrder: [mockCardId],
+        };
+
+        const destListWithCards = {
+          ...mockList2,
+          cardOrder: ["existing-card"],
+        };
+
+        const validMoveInput: ReorderCardInput = {
+          cardId: mockCardId,
+          sourceListId: mockListId,
+          destListId: mockListId2,
+          newIndex: 1, // Valid: at end of list with 1 existing card
+        };
+
+        mockCardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockCard),
+        });
+
+        mockListModel.findById
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(sourceListWithCards),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue(destListWithCards),
+          });
+
+        mockBoardModel.findById.mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockBoard),
+        });
+
+        mockCardModel.findByIdAndUpdate.mockReturnValue({
+          exec: jest.fn().mockResolvedValue({
+            ...mockCard,
+            listId: mockListId2,
+          }),
+        });
+
+        mockListModel.findByIdAndUpdate
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue({
+              ...sourceListWithCards,
+              cardOrder: [],
+            }),
+          })
+          .mockReturnValueOnce({
+            exec: jest.fn().mockResolvedValue({
+              ...destListWithCards,
+              cardOrder: ["existing-card", mockCardId],
+            }),
+          });
+
+        // Act
+        const result = await service.reorderCard(validMoveInput, mockUserId);
+
+        // Assert
+        expect(result).toEqual(mockBoard);
+        expect(mockListModel.findByIdAndUpdate).toHaveBeenNthCalledWith(
+          2,
+          mockListId2,
+          { cardOrder: ["existing-card", mockCardId] },
+          { new: true }
+        );
+      });
     });
   });
 });

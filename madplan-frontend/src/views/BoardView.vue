@@ -28,6 +28,42 @@
           </div>
           
           <div class="flex items-center space-x-4">
+            <!-- Realtime Indicators -->
+            <RealtimeIndicators />
+            
+            <!-- Collaboration Actions -->
+            <div class="flex items-center space-x-2">
+              <button
+                @click="showSearch = true"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Search
+              </button>
+              
+              <button
+                @click="showTemplates = true"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Templates
+              </button>
+              
+              <button
+                @click="showSharing = true"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                </svg>
+                Share
+              </button>
+            </div>
+            
             <!-- User Info -->
             <div class="flex items-center space-x-3">
               <div class="flex items-center space-x-2">
@@ -187,6 +223,42 @@
         </div>
       </div>
     </div>
+    
+    <!-- Modals -->
+    <teleport to="body">
+      <!-- Global Search Modal -->
+      <div v-if="showSearch" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showSearch = false"></div>
+          <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+          <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
+            <GlobalSearch @close="showSearch = false" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Templates Modal -->
+      <div v-if="showTemplates" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showTemplates = false"></div>
+          <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+          <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
+            <TemplateLibrary @close="showTemplates = false" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Sharing Modal -->
+      <div v-if="showSharing" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showSharing = false"></div>
+          <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+          <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
+            <BoardSharing @close="showSharing = false" />
+          </div>
+        </div>
+      </div>
+    </teleport>
 
     <!-- Screen Reader Live Region for Announcements -->
     <div
@@ -201,12 +273,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useBoardStore } from '../stores/board'
+import { useRealtimeStore } from '../stores/realtime'
+import { useCollaborationStore } from '../stores/collaboration'
 import ListColumn from '../components/lists/ListColumn.vue'
 import CreateListForm from '../components/lists/CreateListForm.vue'
+import RealtimeIndicators from '../features/collaboration/RealtimeIndicators.vue'
+import BoardSharing from '../features/collaboration/BoardSharing.vue'
+import GlobalSearch from '../features/search/GlobalSearch.vue'
+import TemplateLibrary from '../features/templates/TemplateLibrary.vue'
 import VueDraggable from 'vuedraggable'
 import type { Board } from '../services/board.service'
 
@@ -214,6 +292,8 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const boardStore = useBoardStore()
+const realtimeStore = useRealtimeStore()
+const collaborationStore = useCollaborationStore()
 
 // Component state
 const board = ref<Board | null>(null)
@@ -222,6 +302,11 @@ const error = ref<string | null>(null)
 const createListError = ref<string | null>(null)
 const cardError = ref<string | null>(null)
 const screenReaderAnnouncement = ref<string>('')
+
+// Modal states
+const showSearch = ref(false)
+const showTemplates = ref(false)
+const showSharing = ref(false)
 
 // Computed properties
 const userEmail = computed(() => authStore.user?.email || 'User')
@@ -471,14 +556,45 @@ const handleListReorder = async (event: any) => {
 }
 
 // Initialize board on mount
-onMounted(() => {
+onMounted(async () => {
   if (!authStore.isAuthenticated) {
     router.push('/login')
     return
   }
   
-  loadBoard()
+  await loadBoard()
+  await initializeRealtime()
 })
+
+onUnmounted(() => {
+  realtimeStore.leaveBoard()
+  realtimeStore.disconnect()
+})
+
+// Initialize realtime features
+const initializeRealtime = async () => {
+  try {
+    await realtimeStore.connect()
+    await realtimeStore.joinBoard(boardId.value)
+    
+    // Set up realtime event handlers
+    realtimeStore.onBoardUpdated((data) => {
+      if (data.boardId === boardId.value) {
+        boardStore.handleBoardUpdate(data)
+      }
+    })
+
+    realtimeStore.onListChanged((data) => {
+      boardStore.handleListChange(data)
+    })
+
+    realtimeStore.onCardChanged((data) => {
+      boardStore.handleCardChange(data)
+    })
+  } catch (error) {
+    console.error('Failed to initialize realtime:', error)
+  }
+}
 </script>
 
 <style scoped>

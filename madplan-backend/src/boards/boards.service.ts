@@ -16,6 +16,8 @@ import { ReorderListInput } from "./dto/reorder-list.dto";
 import { CreateCardInput } from "./dto/create-card.dto";
 import { UpdateCardInput } from "./dto/update-card.dto";
 import { ReorderCardInput } from "./dto/reorder-card.dto";
+import { UpdateBoardThemeInput } from "../themes/dto/update-board-theme.dto";
+import { ThemesService } from "../themes/themes.service";
 
 @Injectable()
 export class BoardsService {
@@ -25,6 +27,7 @@ export class BoardsService {
     @InjectModel(Board.name) private boardModel: Model<BoardDocument>,
     @InjectModel(List.name) private listModel: Model<ListDocument>,
     @InjectModel(Card.name) private cardModel: Model<CardDocument>,
+    private themesService: ThemesService,
   ) {}
 
   /**
@@ -591,6 +594,60 @@ export class BoardsService {
         error.stack,
       );
       throw error;
+    }
+  }
+
+  /**
+   * Update board theme and customizations
+   */
+  async updateBoardTheme(input: UpdateBoardThemeInput, userId: string): Promise<Board> {
+    const { boardId, themeId, customizations } = input;
+    this.logger.log(`Updating theme for board ${boardId} to ${themeId} by user ${userId}`);
+
+    try {
+      // Validate board ownership
+      const board = await this.getBoardById(boardId, userId);
+
+      // Validate theme exists
+      const themeExists = await this.themesService.validateTheme(themeId);
+      if (!themeExists) {
+        throw new BadRequestException(`Theme with ID ${themeId} not found`);
+      }
+
+      // Validate customizations
+      if (customizations && !this.themesService.validateThemeCustomizations(customizations)) {
+        throw new BadRequestException("Invalid theme customizations provided");
+      }
+
+      // Update board with new theme
+      const updatedBoard = await this.boardModel.findByIdAndUpdate(
+        boardId,
+        {
+          $set: {
+            theme: {
+              themeId,
+              customizations: customizations || undefined,
+            },
+          },
+        },
+        { new: true, runValidators: true }
+      ).exec();
+
+      if (!updatedBoard) {
+        throw new NotFoundException(`Board with ID ${boardId} not found`);
+      }
+
+      this.logger.log(`Board theme updated successfully: ${boardId}`);
+      return updatedBoard;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      this.logger.error(
+        `Failed to update board theme for ${boardId}: ${error.message}`,
+        error.stack,
+      );
+      throw new BadRequestException(`Failed to update board theme: ${error.message}`);
     }
   }
 }

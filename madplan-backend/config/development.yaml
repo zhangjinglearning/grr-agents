@@ -1,0 +1,152 @@
+# Development Environment Configuration
+# MadPlan Backend - Studio Ghibli Kanban Board
+
+app:
+  name: 'MadPlan Backend'
+  version: '1.0.0'
+  environment: 'development'
+  port: 3000
+  host: '0.0.0.0'
+  
+  # Development-specific settings
+  debug: true
+  enableGraphQLPlayground: true
+  enableIntrospection: true
+  logLevel: 'debug'
+  enableCors: true
+
+# Database configuration
+database:
+  uri: 'mongodb://localhost:27017/madplan-dev'
+  options:
+    useNewUrlParser: true
+    useUnifiedTopology: true
+    serverSelectionTimeoutMS: 5000
+    socketTimeoutMS: 45000
+    family: 4
+    # Development-specific options
+    maxPoolSize: 10
+    minPoolSize: 1
+    maxIdleTimeMS: 300000
+    waitQueueTimeoutMS: 5000
+    retryWrites: true
+
+# Authentication & Security
+auth:
+  jwtSecret: 'development-secret-key-change-in-production'
+  jwtExpiresIn: '24h'
+  refreshTokenExpiresIn: '7d'
+  bcryptRounds: 10
+  
+  # Development-friendly settings
+  enableTestAccounts: true
+  requireEmailVerification: false
+  sessionTimeout: '24h'
+
+# Redis Cache (optional for development)
+redis:
+  enabled: false
+  host: 'localhost'
+  port: 6379
+  password: null
+  db: 0
+  keyPrefix: 'madplan:dev:'
+  
+  # Cache TTL settings
+  defaultTTL: 3600
+  sessionTTL: 86400
+
+# CORS Configuration
+cors:
+  origins: 
+    - 'http://localhost:5173'
+    - 'http://localhost:3000'
+  credentials: true
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-apollo-tracing']
+
+# GraphQL Configuration
+graphql:
+  path: '/graphql'
+  playground: true
+  introspection: true
+  tracing: true
+  cacheControl: true
+  uploads: true
+  context:
+    includeRequestInContext: true
+    enableResponseLogging: true
+
+# Logging Configuration
+logging:
+  level: 'debug'
+  format: 'pretty'
+  enableFileLogging: false
+  enableConsoleLogging: true
+  
+  # Development-specific logging
+  enableSQLLogging: true
+  enableGraphQLLogging: true
+  enablePerformanceLogging: false
+
+# File Upload Configuration
+upload:
+  maxFileSize: 10485760  # 10MB
+  allowedMimeTypes:
+    - 'image/jpeg'
+    - 'image/png'
+    - 'image/gif'
+    - 'image/webp'
+  destination: './uploads/dev'
+
+# Email Configuration (disabled for development)
+email:
+  enabled: false
+  provider: 'console'  # Logs emails to console
+  from: 'noreply@madplan.dev'
+
+# Feature Flags
+features:
+  enableAnalytics: true
+  enableCollaboration: true
+  enableNotifications: false
+  enableAdvancedFeatures: true
+  enablePerformanceMonitoring: false
+  
+  # Development features
+  enableSeeding: true
+  enableTestData: true
+  enableDebugEndpoints: true
+
+# Rate Limiting (relaxed for development)
+rateLimit:
+  windowMs: 900000  # 15 minutes
+  max: 1000  # requests per windowMs
+  skipSuccessfulRequests: true
+  skipFailedRequests: false
+
+# Health Check Configuration
+healthCheck:
+  enabled: true
+  path: '/api/health'
+  includeDatabase: true
+  includeRedis: false
+  timeout: 5000
+
+# Development Tools
+devTools:
+  enableSeeding: true
+  seedOnStart: false
+  enableMockData: true
+  enableTestEndpoints: true
+  
+  # Test user credentials
+  testUsers:
+    admin:
+      email: 'admin@madplan.dev'
+      password: 'admin123'
+      role: 'admin'
+    user:
+      email: 'user@madplan.dev'
+      password: 'user123'
+      role: 'user'

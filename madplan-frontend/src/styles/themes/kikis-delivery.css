@@ -1,0 +1,342 @@
+/* Kiki's Delivery Service Theme - Coastal town with ocean blues and warm sunset oranges */
+
+[data-theme="kikis-delivery"] {
+  /* Primary Colors - Coastal blues */
+  --color-primary: #0EA5E9;
+  --color-primary-light: #0284C7;
+  --color-primary-dark: #0369A1;
+  
+  /* Secondary Colors - Warm oranges */
+  --color-secondary: #EA580C;
+  --color-secondary-light: #DC2626;
+  --color-secondary-dark: #B91C1C;
+  
+  /* Accent Colors - Sunset pinks */
+  --color-accent: #EC4899;
+  --color-accent-light: #DB2777;
+  --color-accent-dark: #BE185D;
+  
+  /* Neutral Colors - Coastal grays */
+  --color-gray-900: #1E293B;
+  --color-gray-600: #475569;
+  --color-gray-400: #94A3B8;
+  --color-gray-200: #E2E8F0;
+  --color-gray-50: #F8FAFC;
+  
+  /* Background Colors - Coastal town patterns */
+  --bg-main: linear-gradient(135deg, #0EA5E9 0%, #0284C7 25%, #38BDF8 50%, #7DD3FC 75%, #BAE6FD 100%);
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-list: rgba(255, 255, 255, 0.9);
+  
+  /* Background Variants */
+  --bg-main-dark: linear-gradient(135deg, #0369A1 0%, #075985 25%, #0C4A6E 50%, #1E293B 75%, #0F172A 100%);
+  --bg-main-light: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 25%, #BAE6FD 50%, #F8FAFC 75%, #FFFFFF 100%);
+  --bg-main-vibrant: linear-gradient(135deg, #0EA5E9 0%, #EA580C 25%, #EC4899 50%, #0284C7 75%, #38BDF8 100%);
+  
+  /* Flight-inspired smooth transitions */
+  --animation-duration: 0.3s;
+  --transition-fast: 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-normal: 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-slow: 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  
+  /* Ocean wave shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(14, 165, 233, 0.12), 0 1px 2px 0 rgba(14, 165, 233, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(14, 165, 233, 0.18), 0 2px 4px -1px rgba(14, 165, 233, 0.12);
+  --shadow-lg: 0 10px 15px -3px rgba(14, 165, 233, 0.24), 0 4px 6px -2px rgba(14, 165, 233, 0.15);
+  --shadow-xl: 0 20px 25px -5px rgba(14, 165, 233, 0.3), 0 10px 10px -5px rgba(14, 165, 233, 0.18);
+  
+  /* Clean and youthful sans-serif */
+  font-family: 'Inter', 'Poppins', sans-serif;
+  font-weight: 400;
+}
+
+/* Flying delivery animations */
+[data-theme="kikis-delivery"] .theme-card {
+  animation: delivery-flight 6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+[data-theme="kikis-delivery"] .theme-card:nth-child(odd) {
+  animation-delay: -2s;
+}
+
+[data-theme="kikis-delivery"] .theme-card:nth-child(even) {
+  animation-delay: -3s;
+  animation-direction: reverse;
+}
+
+@keyframes delivery-flight {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-12px) translateX(4px);
+  }
+  50% {
+    transform: translateY(-8px) translateX(-2px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(6px);
+  }
+}
+
+/* Ocean wave motion for lists */
+[data-theme="kikis-delivery"] .theme-list {
+  animation: ocean-wave 8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+[data-theme="kikis-delivery"] .theme-list:nth-child(2n) {
+  animation-delay: -4s;
+}
+
+@keyframes ocean-wave {
+  0%, 100% {
+    transform: translateY(0px) rotateZ(0deg);
+  }
+  25% {
+    transform: translateY(-6px) rotateZ(1deg);
+  }
+  75% {
+    transform: translateY(-3px) rotateZ(-0.5deg);
+  }
+}
+
+/* Sunset glow effects */
+[data-theme="kikis-delivery"] .theme-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, 
+    rgba(234, 88, 12, 0.1) 0%, 
+    rgba(14, 165, 233, 0.1) 30%, 
+    rgba(236, 72, 153, 0.1) 60%, 
+    transparent 80%);
+  animation: sunset-glow 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes sunset-glow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1.2) rotate(120deg);
+  }
+}
+
+/* Coastal breeze button effects */
+[data-theme="kikis-delivery"] .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="kikis-delivery"] .btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.4), 
+    transparent);
+  transition: left var(--transition-normal);
+}
+
+[data-theme="kikis-delivery"] .btn-primary:hover::after {
+  left: 100%;
+}
+
+/* Coastal town atmosphere */
+[data-theme="kikis-delivery"] .theme-board {
+  background: var(--bg-main);
+  position: relative;
+}
+
+[data-theme="kikis-delivery"] .theme-board::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 30% 20%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(234, 88, 12, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 20% 60%, rgba(236, 72, 153, 0.04) 0%, transparent 50%);
+  animation: coastal-atmosphere 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes coastal-atmosphere {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1) rotate(0deg);
+  }
+  33% {
+    opacity: 0.8;
+    transform: scale(1.05) rotate(2deg);
+  }
+  66% {
+    opacity: 0.4;
+    transform: scale(0.95) rotate(-1deg);
+  }
+}
+
+/* Seagull flight pattern */
+[data-theme="kikis-delivery"] .theme-board::after {
+  content: '';
+  position: fixed;
+  top: 10%;
+  left: -20px;
+  width: 20px;
+  height: 20px;
+  background: rgba(14, 165, 233, 0.3);
+  border-radius: 50%;
+  animation: seagull-flight 20s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes seagull-flight {
+  0% {
+    left: -20px;
+    top: 10%;
+    transform: scale(0.5);
+  }
+  25% {
+    top: 20%;
+    transform: scale(1);
+  }
+  50% {
+    top: 15%;
+    transform: scale(0.8);
+  }
+  75% {
+    top: 25%;
+    transform: scale(1.2);
+  }
+  100% {
+    left: calc(100% + 20px);
+    top: 30%;
+    transform: scale(0.3);
+  }
+}
+
+/* Ocean-inspired hover effects */
+[data-theme="kikis-delivery"] .theme-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: var(--shadow-xl);
+}
+
+[data-theme="kikis-delivery"] .theme-card:hover::before {
+  animation-duration: 2s;
+}
+
+[data-theme="kikis-delivery"] .theme-list:hover {
+  animation-play-state: paused;
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Sunset color transitions */
+[data-theme="kikis-delivery"] .text-primary {
+  background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+[data-theme="kikis-delivery"] .text-secondary {
+  background: linear-gradient(45deg, var(--color-secondary), var(--color-secondary-light));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Flying envelope animation for new items */
+[data-theme="kikis-delivery"] .theme-card[data-new],
+[data-theme="kikis-delivery"] .theme-list[data-new] {
+  animation: envelope-delivery 1.5s ease-out;
+}
+
+@keyframes envelope-delivery {
+  0% {
+    transform: translateY(-100px) translateX(-50px) rotate(-45deg) scale(0.3);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(10px) translateX(5px) rotate(5deg) scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Wind effect text */
+[data-theme="kikis-delivery"] h1,
+[data-theme="kikis-delivery"] h2,
+[data-theme="kikis-delivery"] h3 {
+  position: relative;
+}
+
+[data-theme="kikis-delivery"] h1::after,
+[data-theme="kikis-delivery"] h2::after,
+[data-theme="kikis-delivery"] h3::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  animation: wind-underline 3s ease-in-out infinite;
+}
+
+@keyframes wind-underline {
+  0%, 100% {
+    transform: scaleX(0.8);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scaleX(1.1);
+    opacity: 1;
+  }
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="kikis-delivery"] .theme-card,
+  [data-theme="kikis-delivery"] .theme-list,
+  [data-theme="kikis-delivery"] .theme-board::before,
+  [data-theme="kikis-delivery"] .theme-board::after {
+    animation: none;
+  }
+  
+  [data-theme="kikis-delivery"] .theme-card::before {
+    animation: none;
+    opacity: 0.3;
+  }
+}
+
+/* High contrast adjustments */
+@media (prefers-contrast: high) {
+  [data-theme="kikis-delivery"] {
+    --color-primary: #0369A1;
+    --color-secondary: #B91C1C;
+    --color-accent: #BE185D;
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  }
+}

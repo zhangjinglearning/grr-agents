@@ -1,0 +1,146 @@
+/* Ghibli Theme System - Main Import File */
+
+/* Import base theme system */
+@import './base.css';
+
+/* Import individual Ghibli themes */
+@import './spirited-away.css';
+@import './totoro.css';
+@import './howls-castle.css';
+@import './kikis-delivery.css';
+
+/* Theme utilities */
+.theme-transition {
+  transition: all var(--transition-normal);
+}
+
+.theme-transition-fast {
+  transition: all var(--transition-fast);
+}
+
+.theme-transition-slow {
+  transition: all var(--transition-slow);
+}
+
+/* Utility classes for theme-aware components */
+.ghibli-card {
+  @apply theme-card;
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+
+.ghibli-list {
+  @apply theme-list;
+  padding: 1rem;
+  margin: 0.5rem;
+  min-height: 200px;
+}
+
+.ghibli-board {
+  @apply theme-board;
+  padding: 2rem;
+}
+
+.ghibli-button {
+  @apply btn-primary;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0.025em;
+}
+
+.ghibli-button-secondary {
+  @apply btn-secondary;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.ghibli-button-accent {
+  @apply btn-accent;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Focus management */
+.ghibli-focus:focus,
+.ghibli-focus:focus-visible {
+  @apply theme-focus;
+}
+
+/* Loading states */
+@keyframes ghibli-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.ghibli-loading {
+  animation: ghibli-spin 1s linear infinite;
+}
+
+/* Theme preview helpers */
+.theme-preview-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.theme-preview-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+
+.theme-preview-container:hover .theme-preview-overlay {
+  opacity: 1;
+}
+
+/* Accessibility helpers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip to content for accessibility */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-primary);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: top var(--transition-fast);
+  z-index: 1000;
+}
+
+.skip-to-content:focus {
+  top: 6px;
+}

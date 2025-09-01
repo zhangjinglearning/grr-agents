@@ -16,8 +16,17 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:integration": "jest --config ./test/jest-integration.json",
+    "test:smoke": "node scripts/smoke-tests.js",
     "test:connection": "node scripts/test-connection.js",
-    "test:deployment": "node scripts/test-deployment.js"
+    "test:deployment": "node scripts/test-deployment.js",
+    "migration:run": "node scripts/migrate.js run",
+    "migration:rollback": "node scripts/migrate.js rollback",
+    "migration:status": "node scripts/migrate.js status",
+    "migration:create": "node scripts/migrate.js create",
+    "deploy:staging": "bash scripts/blue-green-deploy.sh",
+    "deploy:production": "bash scripts/blue-green-deploy.sh",
+    "health:check": "node scripts/health-check.js"
   },
   "dependencies": {
     "@nestjs/apollo": "^12.1.0",

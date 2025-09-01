@@ -11,6 +11,7 @@ import { ReorderListInput } from "./dto/reorder-list.dto";
 import { CreateCardInput } from "./dto/create-card.dto";
 import { UpdateCardInput } from "./dto/update-card.dto";
 import { ReorderCardInput } from "./dto/reorder-card.dto";
+import { UpdateBoardThemeInput } from "../themes/dto/update-board-theme.dto";
 
 @Resolver(() => Board)
 @UseGuards(AuthGuard("jwt"))
@@ -189,6 +190,19 @@ export class BoardsResolver {
     this.logger.log(`Fetching cards for list ${listId} by user ${userId}`);
 
     return this.boardsService.getCardsByList(listId, userId);
+  }
+
+  // ==================== Theme Mutations ====================
+
+  @Mutation(() => Board)
+  async updateBoardTheme(
+    @Args("input") input: UpdateBoardThemeInput,
+    @Context() context: any,
+  ): Promise<Board> {
+    const userId = context.req.user.id;
+    this.logger.log(`Updating theme for board ${input.boardId} to ${input.themeId} by user ${userId}`);
+
+    return this.boardsService.updateBoardTheme(input, userId);
   }
 }
 

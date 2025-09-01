@@ -1,0 +1,283 @@
+/* Howl's Moving Castle Theme - Floating castle with magical blues and silver accents */
+
+[data-theme="howls-castle"] {
+  /* Primary Colors - Magical blues */
+  --color-primary: #2563EB;
+  --color-primary-light: #1D4ED8;
+  --color-primary-dark: #1E40AF;
+  
+  /* Secondary Colors - Silver accents */
+  --color-secondary: #6B7280;
+  --color-secondary-light: #9CA3AF;
+  --color-secondary-dark: #4B5563;
+  
+  /* Accent Colors - Warm whites */
+  --color-accent: #F9FAFB;
+  --color-accent-light: #F3F4F6;
+  --color-accent-dark: #E5E7EB;
+  
+  /* Neutral Colors - Victorian grays */
+  --color-gray-900: #1F2937;
+  --color-gray-600: #4B5563;
+  --color-gray-400: #9CA3AF;
+  --color-gray-200: #E5E7EB;
+  --color-gray-50: #F9FAFB;
+  
+  /* Background Colors - Steampunk castle atmosphere */
+  --bg-main: linear-gradient(135deg, #2563EB 0%, #1D4ED8 25%, #3B82F6 50%, #60A5FA 75%, #93C5FD 100%);
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-list: rgba(255, 255, 255, 0.9);
+  
+  /* Background Variants */
+  --bg-main-dark: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 25%, #1F2937 50%, #111827 75%, #030712 100%);
+  --bg-main-light: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 25%, #BFDBFE 50%, #F9FAFB 75%, #FFFFFF 100%);
+  --bg-main-vibrant: linear-gradient(135deg, #2563EB 0%, #6B7280 25%, #F9FAFB 50%, #1D4ED8 75%, #3B82F6 100%);
+  
+  /* Mechanical and magical combined movements */
+  --animation-duration: 0.25s;
+  --transition-fast: 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-normal: 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-slow: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* Crystalline shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(37, 99, 235, 0.15), 0 1px 2px 0 rgba(37, 99, 235, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.15);
+  --shadow-lg: 0 10px 15px -3px rgba(37, 99, 235, 0.25), 0 4px 6px -2px rgba(37, 99, 235, 0.18);
+  --shadow-xl: 0 20px 25px -5px rgba(37, 99, 235, 0.3), 0 10px 10px -5px rgba(37, 99, 235, 0.2);
+  
+  /* Victorian-inspired elegance */
+  font-family: 'Inter', 'Playfair Display', serif;
+  font-weight: 300;
+}
+
+/* Mechanical floating castle effect */
+[data-theme="howls-castle"] .theme-card {
+  position: relative;
+  animation: castle-float 4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+[data-theme="howls-castle"] .theme-card:nth-child(odd) {
+  animation-delay: -1s;
+}
+
+[data-theme="howls-castle"] .theme-card:nth-child(even) {
+  animation-delay: -2s;
+  animation-direction: reverse;
+}
+
+@keyframes castle-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(0.5deg);
+  }
+  75% {
+    transform: translateY(-4px) rotate(-0.3deg);
+  }
+}
+
+/* Mechanical gear rotation for lists */
+[data-theme="howls-castle"] .theme-list {
+  position: relative;
+  animation: gear-rotation 12s linear infinite;
+}
+
+[data-theme="howls-castle"] .theme-list:nth-child(2n) {
+  animation-direction: reverse;
+  animation-duration: 10s;
+}
+
+@keyframes gear-rotation {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+/* Magical crystalline effects */
+[data-theme="howls-castle"] .theme-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+    transparent 0%, 
+    rgba(37, 99, 235, 0.1) 25%, 
+    transparent 50%, 
+    rgba(107, 114, 128, 0.1) 75%, 
+    transparent 100%);
+  border-radius: inherit;
+  animation: crystal-shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes crystal-shimmer {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02) rotate(180deg);
+  }
+}
+
+/* Steampunk button mechanics */
+[data-theme="howls-castle"] .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+[data-theme="howls-castle"] .btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: all var(--transition-normal);
+}
+
+[data-theme="howls-castle"] .btn-primary:hover::after {
+  width: 200%;
+  height: 200%;
+}
+
+/* Castle architecture patterns */
+[data-theme="howls-castle"] .theme-board {
+  background: var(--bg-main);
+  position: relative;
+}
+
+[data-theme="howls-castle"] .theme-board::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%232563EB' fill-opacity='0.02'%3E%3Cpath d='M0 0h80v80H0z'/%3E%3Cpath d='M20 20h40v40H20z'/%3E%3Cpath d='M30 30h20v20H30z'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(circle at 25% 25%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(107, 114, 128, 0.05) 0%, transparent 50%);
+  animation: castle-architecture 15s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes castle-architecture {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05) rotate(1deg);
+  }
+}
+
+/* Magical particle effects */
+[data-theme="howls-castle"] .theme-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+}
+
+[data-theme="howls-castle"] .theme-card:hover::before {
+  animation-duration: 1s;
+}
+
+/* Victorian text effects */
+[data-theme="howls-castle"] .text-primary {
+  background: linear-gradient(45deg, var(--color-primary), var(--color-primary-light), var(--color-secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 500;
+}
+
+[data-theme="howls-castle"] h1,
+[data-theme="howls-castle"] h2,
+[data-theme="howls-castle"] h3 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* Magical transformation effects */
+[data-theme="howls-castle"] .theme-list:hover {
+  animation-play-state: paused;
+  transform: scale(1.03) rotate(0deg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Clock mechanism animation */
+[data-theme="howls-castle"] .theme-board::after {
+  content: '';
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 30%, transparent 40%);
+  border: 2px solid rgba(37, 99, 235, 0.2);
+  border-radius: 50%;
+  animation: clockwork 8s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes clockwork {
+  0% {
+    transform: rotate(0deg);
+    border-color: rgba(37, 99, 235, 0.2);
+  }
+  25% {
+    border-color: rgba(107, 114, 128, 0.2);
+  }
+  50% {
+    border-color: rgba(249, 250, 251, 0.3);
+  }
+  75% {
+    border-color: rgba(107, 114, 128, 0.2);
+  }
+  100% {
+    transform: rotate(360deg);
+    border-color: rgba(37, 99, 235, 0.2);
+  }
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="howls-castle"] .theme-card,
+  [data-theme="howls-castle"] .theme-list,
+  [data-theme="howls-castle"] .theme-board::before,
+  [data-theme="howls-castle"] .theme-board::after {
+    animation: none;
+  }
+  
+  [data-theme="howls-castle"] .theme-card::before {
+    animation: none;
+    opacity: 0.2;
+  }
+}
+
+/* High contrast adjustments */
+@media (prefers-contrast: high) {
+  [data-theme="howls-castle"] {
+    --color-primary: #1E40AF;
+    --color-secondary: #374151;
+    --color-accent: #E5E7EB;
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  }
+}

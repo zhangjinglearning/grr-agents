@@ -1,0 +1,333 @@
+# Incident Response Configuration
+# Used by monitoring systems to define alert routing and response procedures
+
+incident_response:
+  # Severity level definitions
+  severity_levels:
+    P0:
+      name: "Critical"
+      description: "Complete service outage or data loss"
+      response_time: "15 minutes"
+      escalation_time: "30 minutes"
+      notification_channels: ["phone", "slack", "email", "pagerduty"]
+      auto_escalate: true
+      
+    P1:
+      name: "High"
+      description: "Major feature unavailable or severe performance degradation"
+      response_time: "15 minutes"
+      escalation_time: "1 hour"
+      notification_channels: ["slack", "email", "pagerduty"]
+      auto_escalate: true
+      
+    P2:
+      name: "Medium" 
+      description: "Minor feature issues or moderate performance impact"
+      response_time: "1 hour"
+      escalation_time: "4 hours"
+      notification_channels: ["slack", "email"]
+      auto_escalate: false
+      
+    P3:
+      name: "Low"
+      description: "Cosmetic issues or minimal impact"
+      response_time: "Next business day"
+      escalation_time: "1 week"
+      notification_channels: ["email"]
+      auto_escalate: false
+
+  # Alert routing rules
+  alert_routing:
+    # API Service alerts
+    api_service:
+      error_rate_high:
+        condition: "error_rate > 1%"
+        severity: "P1"
+        description: "API error rate above 1%"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#api-service-recovery"
+        
+      response_time_high:
+        condition: "avg_response_time > 5s"
+        severity: "P1" 
+        description: "API response time above 5 seconds"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#api-service-recovery"
+        
+      health_check_failed:
+        condition: "health_check_status != 200"
+        severity: "P0"
+        description: "API health check failing"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#api-service-recovery"
+        
+      high_cpu:
+        condition: "cpu_utilization > 80%"
+        severity: "P2"
+        description: "High CPU utilization on API servers"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#api-service-recovery"
+        
+    # Database alerts
+    database:
+      connection_failures:
+        condition: "connection_errors > 5"
+        severity: "P0"
+        description: "Database connection failures"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#database-recovery"
+        
+      replica_set_down:
+        condition: "primary_count == 0 OR secondary_count == 0"
+        severity: "P0" 
+        description: "MongoDB replica set member down"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#mongodb-replica-set-issues"
+        
+      slow_queries:
+        condition: "avg_query_time > 1s"
+        severity: "P2"
+        description: "Database queries running slowly"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#database-performance-issues"
+        
+      high_memory:
+        condition: "memory_utilization > 85%"
+        severity: "P1"
+        description: "High memory usage on database"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#database-performance-issues"
+        
+    # Load Balancer alerts
+    load_balancer:
+      unhealthy_targets:
+        condition: "healthy_target_count == 0"
+        severity: "P0"
+        description: "No healthy targets in load balancer"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#load-balancer-recovery"
+        
+      high_4xx_errors:
+        condition: "4xx_error_rate > 5%"
+        severity: "P2"
+        description: "High rate of 4xx errors"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#load-balancer-recovery"
+        
+      high_5xx_errors:
+        condition: "5xx_error_rate > 1%"
+        severity: "P1"
+        description: "High rate of 5xx errors"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#load-balancer-recovery"
+        
+    # CDN alerts
+    cdn:
+      origin_errors:
+        condition: "origin_error_rate > 2%"
+        severity: "P1"
+        description: "CDN origin errors increasing"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#cdn-and-static-assets"
+        
+      cache_hit_rate_low:
+        condition: "cache_hit_rate < 80%"
+        severity: "P2"
+        description: "CDN cache hit rate below 80%"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#cdn-and-static-assets"
+        
+    # SSL Certificate alerts
+    ssl:
+      certificate_expiring:
+        condition: "days_until_expiry < 30"
+        severity: "P2"
+        description: "SSL certificate expires in less than 30 days"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#ssl-certificate-issues"
+        
+      certificate_expired:
+        condition: "days_until_expiry <= 0"
+        severity: "P0"
+        description: "SSL certificate has expired"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#ssl-certificate-issues"
+        
+    # Security alerts
+    security:
+      ddos_attack:
+        condition: "request_rate > 10000/min FROM single_ip"
+        severity: "P0"
+        description: "Potential DDoS attack detected"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#ddos-attack"
+        
+      authentication_failures:
+        condition: "failed_login_attempts > 100/min"
+        severity: "P1"
+        description: "High rate of authentication failures"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#suspected-security-breach"
+        
+      suspicious_activity:
+        condition: "anomaly_score > 0.8"
+        severity: "P2"
+        description: "Suspicious user activity detected"
+        runbook_url: "/monitoring/runbooks/service-recovery.md#suspected-security-breach"
+
+  # Notification configurations
+  notifications:
+    slack:
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#incidents"
+      templates:
+        P0: "🚨 **CRITICAL INCIDENT** 🚨\n**Service**: {service}\n**Description**: {description}\n**Runbook**: {runbook_url}\n**Time**: {timestamp}"
+        P1: "⚠️ **HIGH SEVERITY ALERT** ⚠️\n**Service**: {service}\n**Description**: {description}\n**Runbook**: {runbook_url}\n**Time**: {timestamp}"
+        P2: "📊 **MEDIUM ALERT**\n**Service**: {service}\n**Description**: {description}\n**Time**: {timestamp}"
+        P3: "ℹ️ **LOW PRIORITY ALERT**\n**Service**: {service}\n**Description**: {description}\n**Time**: {timestamp}"
+        
+    email:
+      smtp_server: "smtp.company.com"
+      from_address: "alerts@madplan.com"
+      to_addresses:
+        P0: ["on-call@madplan.com", "engineering-manager@madplan.com"]
+        P1: ["on-call@madplan.com"]
+        P2: ["team-lead@madplan.com"]
+        P3: ["dev-team@madplan.com"]
+        
+    pagerduty:
+      integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+      service_key: "${PAGERDUTY_SERVICE_KEY}"
+      
+  # Escalation policies
+  escalation:
+    default_policy:
+      - level: 1
+        wait_time: "15 minutes"
+        targets: ["primary_oncall"]
+        
+      - level: 2
+        wait_time: "30 minutes"
+        targets: ["secondary_oncall"]
+        
+      - level: 3
+        wait_time: "45 minutes"
+        targets: ["team_lead"]
+        
+      - level: 4
+        wait_time: "60 minutes"
+        targets: ["engineering_manager"]
+        
+    critical_policy:
+      - level: 1
+        wait_time: "5 minutes"
+        targets: ["primary_oncall", "secondary_oncall"]
+        
+      - level: 2
+        wait_time: "15 minutes"
+        targets: ["team_lead", "engineering_manager"]
+        
+      - level: 3
+        wait_time: "30 minutes"
+        targets: ["cto", "vp_engineering"]
+
+  # On-call schedule configuration
+  oncall_schedule:
+    primary:
+      rotation_type: "weekly"
+      start_day: "monday"
+      start_time: "09:00"
+      timezone: "UTC"
+      members:
+        - "john.doe@madplan.com"
+        - "jane.smith@madplan.com"
+        - "bob.wilson@madplan.com"
+        
+    secondary:
+      rotation_type: "weekly"
+      start_day: "monday"
+      start_time: "09:00"
+      timezone: "UTC"
+      members:
+        - "alice.johnson@madplan.com"
+        - "charlie.brown@madplan.com"
+        - "diana.prince@madplan.com"
+
+  # Incident templates
+  incident_templates:
+    api_outage:
+      title: "API Service Outage"
+      description: "The API service is experiencing an outage affecting user access"
+      severity: "P0"
+      impact: "High - All users affected"
+      initial_response: |
+        1. Acknowledge the incident
+        2. Check API health endpoints
+        3. Review recent deployments
+        4. Check infrastructure status
+        5. Implement immediate mitigation
+        
+    database_issues:
+      title: "Database Performance Issues"
+      description: "Database is experiencing performance degradation"
+      severity: "P1"
+      impact: "Medium - Slow response times"
+      initial_response: |
+        1. Check database connection status
+        2. Review slow query logs
+        3. Monitor resource utilization
+        4. Consider scaling if needed
+        
+    security_incident:
+      title: "Security Incident"
+      description: "Potential security incident detected"
+      severity: "P0"
+      impact: "High - Security breach possible"
+      initial_response: |
+        1. Isolate affected systems
+        2. Preserve logs and evidence
+        3. Contact security team
+        4. Begin forensic analysis
+        5. Consider user notification
+
+  # Auto-remediation rules
+  auto_remediation:
+    enabled: true
+    rules:
+      restart_unhealthy_instances:
+        condition: "health_check_failed AND auto_remediation_enabled"
+        action: "restart_instance"
+        cooldown: "10 minutes"
+        max_attempts: 3
+        
+      scale_on_high_cpu:
+        condition: "cpu_utilization > 80% FOR 10 minutes"
+        action: "scale_up"
+        cooldown: "15 minutes"
+        max_scale: "10 instances"
+        
+      clear_cache_on_memory_pressure:
+        condition: "memory_utilization > 90%"
+        action: "clear_cache"
+        cooldown: "5 minutes"
+        
+      enable_circuit_breaker:
+        condition: "error_rate > 5% FOR 2 minutes"
+        action: "enable_circuit_breaker"
+        duration: "15 minutes"
+
+  # Metrics and SLIs
+  sli_definitions:
+    availability:
+      description: "Percentage of successful requests"
+      target: "99.9%"
+      measurement: "successful_requests / total_requests"
+      
+    latency:
+      description: "95th percentile response time"
+      target: "< 500ms"
+      measurement: "p95_response_time"
+      
+    error_rate:
+      description: "Percentage of requests resulting in errors"
+      target: "< 0.1%"
+      measurement: "error_requests / total_requests"
+
+  # Maintenance windows
+  maintenance_windows:
+    weekly_maintenance:
+      day: "sunday"
+      start_time: "02:00 UTC"
+      duration: "2 hours"
+      suppress_alerts: true
+      notify_users: true
+      
+    monthly_patching:
+      schedule: "first sunday of month"
+      start_time: "01:00 UTC"
+      duration: "4 hours"
+      suppress_alerts: false
+      notify_users: true

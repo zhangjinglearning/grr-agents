@@ -22,8 +22,7 @@ nvm use 18
 
 ```bash
 # Clone repositories
-git clone https://github.com/your-org/madplan-backend.git
-git clone https://github.com/your-org/madplan-frontend.git
+git clone https://github.com/zhangjinglearning/grr-agents.git
 
 # Install backend dependencies
 cd madplan-backend

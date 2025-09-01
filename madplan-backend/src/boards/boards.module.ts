@@ -5,6 +5,7 @@ import { List, ListSchema } from "./list.entity";
 import { Card, CardSchema } from "./card.entity";
 import { BoardsService } from "./boards.service";
 import { BoardsResolver, ListsResolver } from "./boards.resolver";
+import { ThemesModule } from "../themes/themes.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { BoardsResolver, ListsResolver } from "./boards.resolver";
       { name: List.name, schema: ListSchema },
       { name: Card.name, schema: CardSchema },
     ]),
+    ThemesModule, // Import ThemesModule to access ThemesService
   ],
   providers: [BoardsService, BoardsResolver, ListsResolver],
   exports: [
