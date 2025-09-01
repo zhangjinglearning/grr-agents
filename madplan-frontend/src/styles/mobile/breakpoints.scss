@@ -1,0 +1,228 @@
+/**
+ * Mobile-First Responsive Breakpoint System
+ * Following mobile-first design principles with progressive enhancement
+ */
+
+// Breakpoint definitions following mobile-first approach
+$breakpoints: (
+  mobile: 320px,    // Mobile phones (320px - 767px)
+  tablet: 768px,    // Tablets and small laptops (768px - 1023px) 
+  desktop: 1024px,  // Desktop and large tablets (1024px - 1439px)
+  wide: 1440px      // Large desktop screens and 4K displays (1440px+)
+) !default;
+
+// Mobile-first mixin for responsive design
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    $value: map-get($breakpoints, $breakpoint);
+    @media screen and (min-width: $value) {
+      @content;
+    }
+  } @else {
+    @error "Invalid breakpoint: #{$breakpoint}";
+  }
+}
+
+// Range-specific mixins for targeted styling
+@mixin mobile-only {
+  @media screen and (max-width: 767px) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    @content;
+  }
+}
+
+@mixin desktop-only {
+  @media screen and (min-width: 1024px) and (max-width: 1439px) {
+    @content;
+  }
+}
+
+@mixin wide-only {
+  @media screen and (min-width: 1440px) {
+    @content;
+  }
+}
+
+// Touch device detection
+@mixin touch-device {
+  @media (hover: none) and (pointer: coarse) {
+    @content;
+  }
+}
+
+@mixin no-touch-device {
+  @media (hover: hover) and (pointer: fine) {
+    @content;
+  }
+}
+
+// High DPI/Retina display support
+@mixin retina {
+  @media (-webkit-min-device-pixel-ratio: 2),
+         (min-resolution: 192dpi),
+         (min-resolution: 2dppx) {
+    @content;
+  }
+}
+
+// Landscape/Portrait orientation mixins
+@mixin landscape {
+  @media screen and (orientation: landscape) {
+    @content;
+  }
+}
+
+@mixin portrait {
+  @media screen and (orientation: portrait) {
+    @content;
+  }
+}
+
+// Container max-widths for different breakpoints
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+
+  @include respond-to(tablet) {
+    max-width: 750px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  @include respond-to(desktop) {
+    max-width: 1200px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  @include respond-to(wide) {
+    max-width: 1400px;
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}
+
+// Fluid container that uses full width
+.container-fluid {
+  width: 100%;
+  padding-left: 16px;
+  padding-right: 16px;
+
+  @include respond-to(tablet) {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  @include respond-to(desktop) {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+// Grid system variables
+$grid-columns: 12 !default;
+$grid-gutter: 16px !default;
+
+// Mobile-first flexbox grid system
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -($grid-gutter / 2);
+  margin-right: -($grid-gutter / 2);
+}
+
+.col {
+  flex-basis: 0;
+  flex-grow: 1;
+  max-width: 100%;
+  padding-left: ($grid-gutter / 2);
+  padding-right: ($grid-gutter / 2);
+}
+
+// Generate responsive column classes
+@for $i from 1 through $grid-columns {
+  .col-#{$i} {
+    flex: 0 0 percentage($i / $grid-columns);
+    max-width: percentage($i / $grid-columns);
+    padding-left: ($grid-gutter / 2);
+    padding-right: ($grid-gutter / 2);
+  }
+
+  @include respond-to(tablet) {
+    .col-md-#{$i} {
+      flex: 0 0 percentage($i / $grid-columns);
+      max-width: percentage($i / $grid-columns);
+    }
+  }
+
+  @include respond-to(desktop) {
+    .col-lg-#{$i} {
+      flex: 0 0 percentage($i / $grid-columns);
+      max-width: percentage($i / $grid-columns);
+    }
+  }
+
+  @include respond-to(wide) {
+    .col-xl-#{$i} {
+      flex: 0 0 percentage($i / $grid-columns);
+      max-width: percentage($i / $grid-columns);
+    }
+  }
+}
+
+// Utility classes for responsive display
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-inline { display: inline !important; }
+.d-inline-block { display: inline-block !important; }
+.d-flex { display: flex !important; }
+.d-inline-flex { display: inline-flex !important; }
+
+@include respond-to(tablet) {
+  .d-md-none { display: none !important; }
+  .d-md-block { display: block !important; }
+  .d-md-inline { display: inline !important; }
+  .d-md-inline-block { display: inline-block !important; }
+  .d-md-flex { display: flex !important; }
+  .d-md-inline-flex { display: inline-flex !important; }
+}
+
+@include respond-to(desktop) {
+  .d-lg-none { display: none !important; }
+  .d-lg-block { display: block !important; }
+  .d-lg-inline { display: inline !important; }
+  .d-lg-inline-block { display: inline-block !important; }
+  .d-lg-flex { display: flex !important; }
+  .d-lg-inline-flex { display: inline-flex !important; }
+}
+
+@include respond-to(wide) {
+  .d-xl-none { display: none !important; }
+  .d-xl-block { display: block !important; }
+  .d-xl-inline { display: inline !important; }
+  .d-xl-inline-block { display: inline-block !important; }
+  .d-xl-flex { display: flex !important; }
+  .d-xl-inline-flex { display: inline-flex !important; }
+}
+
+// Safe area support for devices with notches
+.safe-area-inset {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}

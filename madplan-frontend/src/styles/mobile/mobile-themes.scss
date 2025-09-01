@@ -1,0 +1,497 @@
+/**
+ * Mobile-Optimized Theme Adaptations
+ * Enhanced themes for mobile devices with better readability and touch interaction
+ */
+
+// Mobile-specific design tokens
+:root {
+  // Enhanced spacing for mobile
+  --mobile-spacing-xs: 4px;
+  --mobile-spacing-sm: 8px;
+  --mobile-spacing-md: 16px;
+  --mobile-spacing-lg: 24px;
+  --mobile-spacing-xl: 32px;
+  --mobile-spacing-2xl: 48px;
+  
+  // Mobile typography scale
+  --mobile-font-size-xs: 12px;
+  --mobile-font-size-sm: 14px;
+  --mobile-font-size-base: 16px;
+  --mobile-font-size-lg: 18px;
+  --mobile-font-size-xl: 20px;
+  --mobile-font-size-2xl: 24px;
+  --mobile-font-size-3xl: 30px;
+  --mobile-font-size-4xl: 36px;
+  
+  // Mobile line heights for better readability
+  --mobile-line-height-tight: 1.25;
+  --mobile-line-height-snug: 1.375;
+  --mobile-line-height-normal: 1.5;
+  --mobile-line-height-relaxed: 1.625;
+  --mobile-line-height-loose: 2;
+  
+  // Mobile-optimized shadows
+  --mobile-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --mobile-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --mobile-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --mobile-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  
+  // Mobile border radius
+  --mobile-radius-sm: 4px;
+  --mobile-radius-md: 6px;
+  --mobile-radius-lg: 8px;
+  --mobile-radius-xl: 12px;
+  --mobile-radius-2xl: 16px;
+  --mobile-radius-full: 50%;
+}
+
+// Ghibli Theme Mobile Adaptations
+[data-theme="ghibli"] {
+  @include mobile-only {
+    // Enhanced contrast for mobile screens
+    --primary-color: #5a3d9f; // Slightly darker for better readability
+    --text-primary: #1f2937; // Increased contrast
+    --text-secondary: #4b5563; // Better readability
+    
+    // Mobile-optimized background
+    --bg-primary: #fefefe;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    
+    // Enhanced borders for mobile
+    --border-color: #d1d5db;
+    --border-color-light: #e5e7eb;
+    
+    // Mobile-friendly shadows with higher contrast
+    --shadow-color: rgba(0, 0, 0, 0.15);
+  }
+  
+  // Card adaptations for mobile
+  .card {
+    @include mobile-only {
+      border-radius: var(--mobile-radius-lg);
+      box-shadow: var(--mobile-shadow-md);
+      padding: var(--mobile-spacing-lg);
+      margin-bottom: var(--mobile-spacing-md);
+      
+      .card-title {
+        font-size: var(--mobile-font-size-lg);
+        line-height: var(--mobile-line-height-snug);
+        margin-bottom: var(--mobile-spacing-sm);
+      }
+      
+      .card-text {
+        font-size: var(--mobile-font-size-base);
+        line-height: var(--mobile-line-height-relaxed);
+      }
+    }
+  }
+  
+  // Button mobile adaptations
+  .btn {
+    @include mobile-only {
+      font-size: var(--mobile-font-size-base);
+      font-weight: 600;
+      border-radius: var(--mobile-radius-lg);
+      box-shadow: var(--mobile-shadow-sm);
+      
+      &:active {
+        box-shadow: var(--mobile-shadow-md);
+      }
+    }
+  }
+}
+
+// Sky Theme Mobile Adaptations
+[data-theme="sky"] {
+  @include mobile-only {
+    // Enhanced sky blue colors for mobile
+    --primary-color: #0284c7; // Deeper sky blue
+    --primary-light: #7dd3fc;
+    --primary-dark: #0c4a6e;
+    
+    // Better mobile contrast
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    
+    // Mobile background adjustments
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  }
+  
+  // Sky theme mobile components
+  .navbar {
+    @include mobile-only {
+      background: var(--bg-gradient);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color-light);
+    }
+  }
+}
+
+// Forest Theme Mobile Adaptations
+[data-theme="forest"] {
+  @include mobile-only {
+    // Enhanced forest green for mobile
+    --primary-color: #166534; // Deeper forest green
+    --primary-light: #86efac;
+    --primary-dark: #14532d;
+    
+    // Better contrast on mobile
+    --text-primary: #1c1917;
+    --text-secondary: #44403c;
+    
+    // Mobile forest background
+    --bg-primary: #fefefe;
+    --bg-secondary: #f9fafb;
+    --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  }
+}
+
+// Sunset Theme Mobile Adaptations
+[data-theme="sunset"] {
+  @include mobile-only {
+    // Enhanced sunset colors for mobile
+    --primary-color: #c2410c; // Deeper orange
+    --primary-light: #fed7aa;
+    --primary-dark: #9a3412;
+    
+    // Mobile sunset contrast
+    --text-primary: #1c1917;
+    --text-secondary: #57534e;
+    
+    // Mobile sunset background
+    --bg-primary: #ffffff;
+    --bg-secondary: #fef7ed;
+    --bg-gradient: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+  }
+}
+
+// Ocean Theme Mobile Adaptations
+[data-theme="ocean"] {
+  @include mobile-only {
+    // Enhanced ocean blue for mobile
+    --primary-color: #1e40af; // Deeper ocean blue
+    --primary-light: #93c5fd;
+    --primary-dark: #1e3a8a;
+    
+    // Mobile ocean contrast
+    --text-primary: #0f172a;
+    --text-secondary: #1e293b;
+    
+    // Mobile ocean background
+    --bg-primary: #ffffff;
+    --bg-secondary: #f1f5f9;
+    --bg-gradient: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  }
+}
+
+// Mobile-specific typography improvements
+@include mobile-only {
+  // Base typography optimizations
+  body {
+    font-size: var(--mobile-font-size-base);
+    line-height: var(--mobile-line-height-relaxed);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-size-adjust: 100%; // Prevent iOS text size adjustment
+  }
+  
+  // Heading mobile adaptations
+  h1, .h1 {
+    font-size: var(--mobile-font-size-3xl);
+    line-height: var(--mobile-line-height-tight);
+    margin-bottom: var(--mobile-spacing-lg);
+  }
+  
+  h2, .h2 {
+    font-size: var(--mobile-font-size-2xl);
+    line-height: var(--mobile-line-height-snug);
+    margin-bottom: var(--mobile-spacing-md);
+  }
+  
+  h3, .h3 {
+    font-size: var(--mobile-font-size-xl);
+    line-height: var(--mobile-line-height-snug);
+    margin-bottom: var(--mobile-spacing-sm);
+  }
+  
+  h4, .h4 {
+    font-size: var(--mobile-font-size-lg);
+    line-height: var(--mobile-line-height-normal);
+    margin-bottom: var(--mobile-spacing-sm);
+  }
+  
+  h5, .h5,
+  h6, .h6 {
+    font-size: var(--mobile-font-size-base);
+    line-height: var(--mobile-line-height-normal);
+    margin-bottom: var(--mobile-spacing-xs);
+  }
+  
+  // Paragraph mobile optimization
+  p {
+    font-size: var(--mobile-font-size-base);
+    line-height: var(--mobile-line-height-relaxed);
+    margin-bottom: var(--mobile-spacing-md);
+  }
+  
+  // Small text mobile adaptation
+  small, .small {
+    font-size: var(--mobile-font-size-sm);
+    line-height: var(--mobile-line-height-normal);
+  }
+}
+
+// Mobile navigation theme adaptations
+.navbar {
+  @include mobile-only {
+    padding: var(--mobile-spacing-sm) var(--mobile-spacing-md);
+    min-height: 64px; // Adequate touch target
+    
+    .navbar-brand {
+      font-size: var(--mobile-font-size-lg);
+      font-weight: 700;
+    }
+    
+    .navbar-toggle {
+      border: none;
+      background: transparent;
+      padding: var(--mobile-spacing-sm);
+      border-radius: var(--mobile-radius-md);
+      
+      .navbar-toggle-icon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+}
+
+// Mobile sidebar adaptations
+.sidebar {
+  @include mobile-only {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1050;
+    
+    &.sidebar-open {
+      transform: translateX(0);
+    }
+    
+    .sidebar-header {
+      padding: var(--mobile-spacing-lg);
+      border-bottom: 1px solid var(--border-color-light);
+    }
+    
+    .sidebar-nav {
+      padding: var(--mobile-spacing-md) 0;
+      
+      .nav-item {
+        .nav-link {
+          padding: var(--mobile-spacing-md) var(--mobile-spacing-lg);
+          font-size: var(--mobile-font-size-base);
+        }
+      }
+    }
+  }
+}
+
+// Mobile board layout adaptations
+.board-container {
+  @include mobile-only {
+    padding: var(--mobile-spacing-md);
+    
+    .board-header {
+      margin-bottom: var(--mobile-spacing-lg);
+      
+      .board-title {
+        font-size: var(--mobile-font-size-2xl);
+        margin-bottom: var(--mobile-spacing-sm);
+      }
+    }
+    
+    .board-lists {
+      display: flex;
+      gap: var(--mobile-spacing-md);
+      overflow-x: auto;
+      padding-bottom: var(--mobile-spacing-md);
+      
+      &::-webkit-scrollbar {
+        height: 4px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: var(--mobile-radius-full);
+      }
+    }
+    
+    .board-list {
+      flex: 0 0 280px;
+      background: var(--bg-secondary);
+      border-radius: var(--mobile-radius-lg);
+      padding: var(--mobile-spacing-md);
+      
+      .list-header {
+        margin-bottom: var(--mobile-spacing-md);
+        
+        .list-title {
+          font-size: var(--mobile-font-size-lg);
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+// Mobile card adaptations
+.kanban-card {
+  @include mobile-only {
+    margin-bottom: var(--mobile-spacing-sm);
+    padding: var(--mobile-spacing-md);
+    border-radius: var(--mobile-radius-md);
+    box-shadow: var(--mobile-shadow-sm);
+    
+    &:active {
+      transform: scale(0.98);
+      box-shadow: var(--mobile-shadow-md);
+    }
+    
+    .card-title {
+      font-size: var(--mobile-font-size-base);
+      font-weight: 600;
+      margin-bottom: var(--mobile-spacing-xs);
+    }
+    
+    .card-description {
+      font-size: var(--mobile-font-size-sm);
+      line-height: var(--mobile-line-height-relaxed);
+      color: var(--text-secondary);
+      margin-bottom: var(--mobile-spacing-sm);
+    }
+    
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: var(--mobile-font-size-xs);
+      color: var(--text-secondary);
+    }
+  }
+}
+
+// Mobile modal adaptations
+.modal {
+  @include mobile-only {
+    .modal-dialog {
+      margin: var(--mobile-spacing-md);
+      max-width: calc(100vw - 32px);
+      
+      &.modal-fullscreen-mobile {
+        margin: 0;
+        max-width: 100vw;
+        height: 100vh;
+        
+        .modal-content {
+          height: 100vh;
+          border-radius: 0;
+        }
+      }
+    }
+    
+    .modal-content {
+      border-radius: var(--mobile-radius-xl);
+      
+      .modal-header {
+        padding: var(--mobile-spacing-lg);
+        border-bottom: 1px solid var(--border-color-light);
+        
+        .modal-title {
+          font-size: var(--mobile-font-size-lg);
+          font-weight: 600;
+        }
+      }
+      
+      .modal-body {
+        padding: var(--mobile-spacing-lg);
+      }
+      
+      .modal-footer {
+        padding: var(--mobile-spacing-lg);
+        border-top: 1px solid var(--border-color-light);
+        
+        .btn {
+          flex: 1;
+          margin: 0 var(--mobile-spacing-xs);
+        }
+      }
+    }
+  }
+}
+
+// High contrast mode for mobile accessibility
+@media (prefers-contrast: high) {
+  @include mobile-only {
+    :root {
+      --text-primary: #000000;
+      --text-secondary: #333333;
+      --border-color: #666666;
+      --shadow-color: rgba(0, 0, 0, 0.25);
+    }
+    
+    .btn {
+      border-width: 2px;
+      font-weight: 700;
+    }
+    
+    .card,
+    .modal-content {
+      border: 2px solid var(--border-color);
+    }
+  }
+}
+
+// Reduced motion support for mobile
+@media (prefers-reduced-motion: reduce) {
+  @include mobile-only {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    
+    .sidebar {
+      transition: none;
+    }
+    
+    .modal {
+      .modal-dialog {
+        transform: none !important;
+      }
+    }
+  }
+}
+
+// Dark mode mobile adaptations
+@media (prefers-color-scheme: dark) {
+  @include mobile-only {
+    [data-theme="ghibli"] {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2d2d2d;
+      --bg-tertiary: #3d3d3d;
+      --text-primary: #ffffff;
+      --text-secondary: #e5e5e5;
+      --border-color: #4a4a4a;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+  }
+}
