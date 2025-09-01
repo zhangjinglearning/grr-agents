@@ -12,7 +12,7 @@ export interface DatabaseConnectionConfig {
     bufferMaxEntries: number;
     retryWrites: boolean;
     readPreference: string;
-    readConcern: { level: string };
+
     writeConcern: { w: string | number; j: boolean };
   };
 }
@@ -69,7 +69,7 @@ export default registerAs('database', (): DatabaseConfig => {
     options: {
       ...connectionOptions,
       readPreference: 'primary',
-      readConcern: { level: 'majority' },
+
       writeConcern: { w: 'majority', j: true },
     },
   };
@@ -83,7 +83,7 @@ export default registerAs('database', (): DatabaseConfig => {
           maxPoolSize: Math.max(10, Math.floor(connectionOptions.maxPoolSize / 2)),
           minPoolSize: Math.max(2, Math.floor(connectionOptions.minPoolSize / 2)),
           readPreference: 'secondary',
-          readConcern: { level: 'available' },
+
           writeConcern: { w: 'majority', j: true },
         },
       }
@@ -97,7 +97,7 @@ export default registerAs('database', (): DatabaseConfig => {
       maxPoolSize: Math.max(20, Math.floor(connectionOptions.maxPoolSize / 3)),
       minPoolSize: Math.max(5, Math.floor(connectionOptions.minPoolSize / 2)),
       readPreference: readonlyConfig ? 'secondary' : 'secondaryPreferred',
-      readConcern: { level: 'available' },
+
       writeConcern: { w: 'majority', j: false }, // Relaxed for analytics
     },
   };
@@ -162,7 +162,7 @@ export class DatabaseConnectionFactory {
       // Compression for better network performance
       compressors: ['zlib'],
       zlibCompressionLevel: 6,
-    });
+    } as any);
 
     // Connection event handlers
     connection.on('connected', () => {

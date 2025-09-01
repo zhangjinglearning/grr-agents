@@ -188,7 +188,15 @@ export const monitoringProfiles = {
   development: {
     datadog: {
       enabled: false,
-      enableProfiling: false
+      apiKey: '',
+      appKey: '',
+      service: 'madplan-backend-dev',
+      env: 'development',
+      version: '1.0.0',
+      enableProfiling: false,
+      enableRuntimeMetrics: false,
+      logInjection: false,
+      tags: {}
     },
     sentry: {
       enabled: false,
@@ -209,7 +217,16 @@ export const monitoringProfiles = {
   
   test: {
     datadog: {
-      enabled: false
+      enabled: false,
+      apiKey: '',
+      appKey: '',
+      service: 'madplan-backend-test',
+      env: 'test',
+      version: '1.0.0',
+      enableProfiling: false,
+      enableRuntimeMetrics: false,
+      logInjection: false,
+      tags: {}
     },
     sentry: {
       enabled: false
@@ -230,7 +247,15 @@ export const monitoringProfiles = {
   staging: {
     datadog: {
       enabled: true,
-      enableProfiling: false
+      apiKey: process.env.DATADOG_API_KEY || '',
+      appKey: process.env.DATADOG_APP_KEY || '',
+      service: 'madplan-backend-staging',
+      env: 'staging',
+      version: '1.0.0',
+      enableProfiling: false,
+      enableRuntimeMetrics: true,
+      logInjection: true,
+      tags: { environment: 'staging' }
     },
     sentry: {
       enabled: true,
@@ -261,8 +286,15 @@ export const monitoringProfiles = {
   production: {
     datadog: {
       enabled: true,
+      apiKey: process.env.DATADOG_API_KEY || '',
+      appKey: process.env.DATADOG_APP_KEY || '',
+      service: 'madplan-backend',
+      env: 'production',
+      version: process.env.APP_VERSION || '1.0.0',
       enableProfiling: true,
-      enableRuntimeMetrics: true
+      enableRuntimeMetrics: true,
+      logInjection: true,
+      tags: { environment: 'production' }
     },
     sentry: {
       enabled: true,
@@ -293,7 +325,7 @@ export const monitoringProfiles = {
 
 // Helper function to get environment-specific config
 export function getMonitoringConfig(environment: string = process.env.NODE_ENV || 'development'): Partial<MonitoringConfig> {
-  return monitoringProfiles[environment as keyof typeof monitoringProfiles] || monitoringProfiles.development;
+  return (monitoringProfiles[environment as keyof typeof monitoringProfiles] || monitoringProfiles.development) as Partial<MonitoringConfig>;
 }
 
 // Custom metric definitions for business logic

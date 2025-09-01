@@ -1,9 +1,9 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { ConfigService } from '@nestjs/config';
-import * as helmet from 'helmet';
-import * as rateLimit from 'express-rate-limit';
-import * as RedisStore from 'rate-limit-redis';
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const RedisStore = require('rate-limit-redis');
 import { createClient } from 'redis';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { SecretsManagerService } from '../services/secrets-manager.service';

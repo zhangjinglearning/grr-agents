@@ -158,7 +158,7 @@ export class NotificationsService {
     this.logger.log(`Sending ${reminder.type} reminder for card ${scheduling.cardId}`);
 
     try {
-      const card = scheduling.card as any;
+      const card = (scheduling as any).card;
       const cardTitle = card?.content || 'Untitled Card';
       
       const reminderData = {

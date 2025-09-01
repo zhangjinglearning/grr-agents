@@ -44,6 +44,17 @@ export class Card {
   @IsNotEmpty({ message: 'List ID is required' })
   listId: string;
 
+  @Prop({
+    required: true,
+    type: Types.ObjectId,
+    ref: 'Board',
+    index: true,
+  })
+  @Field(() => ID)
+  @IsString()
+  @IsNotEmpty({ message: 'Board ID is required' })
+  boardId: string;
+
   @Field()
   createdAt: Date;
 

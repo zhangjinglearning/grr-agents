@@ -234,7 +234,7 @@ export class DatabaseOptimizationService implements OnModuleInit {
         const collection = this.connection.collection(collectionName);
         const indexName = this.generateIndexName(recommendation.index);
 
-        await collection.createIndex(recommendation.index, {
+        await collection.createIndex(recommendation.index as any, {
           background: true,
           name: indexName,
         });

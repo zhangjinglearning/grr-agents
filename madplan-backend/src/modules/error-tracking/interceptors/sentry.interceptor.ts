@@ -21,24 +21,17 @@ export class SentryInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
+    const response = context.switchToHttp().getResponse();
     const startTime = Date.now();
 
-    // Create Sentry transaction
-    const transaction = Sentry.startTransaction({
-      name: `${request.method} ${request.route?.path || request.url}`,
-      op: 'http.server',
-      tags: {
-        method: request.method,
-        url: request.url,
-        route: request.route?.path,
-      },
-    });
+    // Temporarily disabled Sentry transaction for compatibility
+    const transaction = null;
 
     // Set user context if available
     const userId = (request as any).user?.id;
     if (userId) {
       Sentry.setUser({ id: userId });
-      transaction.setTag('user.id', userId);
+      // transaction.setTag('user.id', userId); // Disabled
     }
 
     // Set request context

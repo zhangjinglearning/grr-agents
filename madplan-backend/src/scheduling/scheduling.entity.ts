@@ -108,7 +108,6 @@ export class CardScheduling {
   cardId: string;
 
   @Prop({
-    required: false,
     type: Date,
     index: true,
   })
@@ -119,7 +118,6 @@ export class CardScheduling {
   dueDate?: Date;
 
   @Prop({
-    required: false,
     type: Date,
   })
   @Field({ nullable: true })
@@ -137,7 +135,6 @@ export class CardScheduling {
   isRecurring: boolean;
 
   @Prop({
-    required: false,
     type: {
       type: { type: String, enum: RecurrenceType, required: true },
       interval: { type: Number, required: true, min: 1, max: 365 },
@@ -177,7 +174,6 @@ export class CardScheduling {
   status: SchedulingStatus;
 
   @Prop({
-    required: false,
     type: Date,
   })
   @Field({ nullable: true })
@@ -187,7 +183,6 @@ export class CardScheduling {
   completedAt?: Date;
 
   @Prop({
-    required: false,
     type: String,
   })
   @Field({ nullable: true })
@@ -196,7 +191,6 @@ export class CardScheduling {
   timeZone?: string; // User's timezone for accurate scheduling
 
   @Prop({
-    required: false,
     type: Number,
     default: 0,
   })

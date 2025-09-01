@@ -38,6 +38,16 @@ export class Board {
   ownerId: string;
 
   @Prop({
+    required: true,
+    type: Types.ObjectId,
+    ref: "User",
+  })
+  @Field(() => ID)
+  @IsString()
+  @IsNotEmpty()
+  createdBy: string;
+
+  @Prop({
     type: [String],
     default: [],
   })

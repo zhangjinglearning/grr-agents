@@ -234,7 +234,7 @@ export class AnalyticsService {
           ...(groupBy && { [groupBy]: { $size: `$${groupBy}` } }),
         },
       },
-      { $sort: { _id: 1 } }
+      { $sort: { _id: 1 as 1 } }
     );
 
     const results = await this.eventModel.aggregate(pipeline).exec();
@@ -298,6 +298,7 @@ export class AnalyticsService {
           startDate: comparisonPeriod.startDate,
           endDate: comparisonPeriod.endDate,
           boardId,
+          includeComparison: false,
         },
         userId
       );
@@ -363,7 +364,7 @@ export class AnalyticsService {
       insights,
     ] = await Promise.all([
       this.getRecentEvents(userId, boardId, 10),
-      this.getProductivityReport({ startDate, endDate, boardId }, userId),
+      this.getProductivityReport({ startDate, endDate, boardId, includeComparison: false }, userId),
       boardId ? this.getBoardAnalytics(boardId, startDate, endDate) : null,
       this.getPerformanceInsights(userId, boardId),
     ]);

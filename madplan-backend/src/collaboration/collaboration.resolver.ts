@@ -61,8 +61,8 @@ export class CollaborationResolver {
   @Query(() => [BoardShare])
   @UseGuards(JwtAuthGuard)
   async getSharedBoards(
-    @Args('query', { nullable: true }) query?: ShareQueryInput,
     @Context() context: any,
+    @Args('query', { nullable: true }) query?: ShareQueryInput,
   ): Promise<BoardShare[]> {
     const userId = context.req.user.userId;
     return this.collaborationService.getSharedWithMe(userId, query);
@@ -81,13 +81,13 @@ export class CollaborationResolver {
   @Mutation(() => String)
   @UseGuards(JwtAuthGuard)
   async generateShareLink(
+    @Context() context: any,
     @Args('boardId', { type: () => ID }) boardId: string,
     @Args('permission') permission: string,
     @Args('expiresAt', { nullable: true }) expiresAt?: Date,
-    @Context() context: any,
   ): Promise<string> {
     const userId = context.req.user.userId;
-    return this.collaborationService.generateShareLink(boardId, permission as any, expiresAt);
+    return this.collaborationService.generateShareLink(boardId, userId, permission as any, expiresAt);
   }
 
   @Query(() => Object)

@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 import { Field, ID, ObjectType } from "@nestjs/graphql";
 import { IsEmail, IsString, MinLength } from "class-validator";
+import { Role } from "../auth/enums/role.enum";
 
 export type UserDocument = User & Document;
 
@@ -30,6 +31,14 @@ export class User {
   @IsString()
   @MinLength(6)
   password: string; // This will be hashed before storage
+
+  @Prop({
+    type: [String],
+    enum: Role,
+    default: [Role.USER],
+  })
+  @Field(() => [String])
+  roles: Role[];
 
   @Field()
   createdAt?: Date;

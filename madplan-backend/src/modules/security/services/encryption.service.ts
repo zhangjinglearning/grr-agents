@@ -72,12 +72,9 @@ export class EncryptionService {
       
       // Encrypt data using data key
       const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipher(algorithm, dataKey);
-      cipher.setAAD(Buffer.from(JSON.stringify(options.context || {})));
-      
+      const cipher = crypto.createCipher('aes-256-cbc', dataKey);
       const dataBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
       const encrypted = Buffer.concat([cipher.update(dataBuffer), cipher.final()]);
-      const tag = cipher.getAuthTag();
       
       // Clear the plaintext data key from memory
       dataKey.fill(0);
@@ -86,7 +83,6 @@ export class EncryptionService {
         encryptedData: encrypted.toString('base64'),
         dataKey: Buffer.from(encryptedDataKey).toString('base64'),
         iv: iv.toString('base64'),
-        tag: tag.toString('base64'),
       };
       
     } catch (error) {
@@ -126,13 +122,9 @@ export class EncryptionService {
       }
       
       // Decrypt data using data key
-      const iv = Buffer.from(encryptionResult.iv, 'base64');
-      const tag = Buffer.from(encryptionResult.tag, 'base64');
       const encryptedData = Buffer.from(encryptionResult.encryptedData, 'base64');
-      
-      const decipher = crypto.createDecipher(algorithm, dataKey);
-      decipher.setAAD(Buffer.from(JSON.stringify(options.context || {})));
-      decipher.setAuthTag(tag);
+
+      const decipher = crypto.createDecipher('aes-256-cbc', dataKey);
       
       const decrypted = Buffer.concat([
         decipher.update(encryptedData),

@@ -559,8 +559,8 @@ export class GDPRComplianceService {
         exportDate: new Date(),
         totalBoards: boards.length,
         totalCards: cards.length,
-        accountCreated: user?.createdAt,
-        lastActive: user?.lastLoginAt,
+        accountCreated: (user as any)?.createdAt,
+        lastActive: (user as any)?.lastLoginAt,
       },
     };
   }

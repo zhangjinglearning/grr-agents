@@ -10,7 +10,7 @@ export class UpdateRecurrencePatternInput extends PartialType(CreateRecurrencePa
 export class UpdateReminderInput extends PartialType(CreateReminderInput) {}
 
 @InputType()
-export class UpdateSchedulingInput extends PartialType(CreateSchedulingInput) {
+export class UpdateSchedulingInput {
   @Field()
   @IsString()
   @IsNotEmpty()
@@ -28,4 +28,8 @@ export class UpdateSchedulingInput extends PartialType(CreateSchedulingInput) {
   @IsOptional()
   @IsEnum(SchedulingStatus)
   status?: SchedulingStatus;
+
+  @Field(() => Date, { nullable: true })
+  @IsOptional()
+  dueDate?: Date;
 }

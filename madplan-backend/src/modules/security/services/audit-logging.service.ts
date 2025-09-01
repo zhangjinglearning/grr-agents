@@ -79,7 +79,7 @@ export class AuditLoggingService {
   async logAuthenticationEvent(
     userId: string,
     userEmail: string,
-    action: 'login' | 'logout' | 'login_failed' | 'password_change' | 'password_reset',
+    action: 'login' | 'logout' | 'login_failed' | 'password_change' | 'password_reset' | 'mfa_failed' | 'mfa_success' | 'mfa_setup' | 'mfa_verification_failed' | 'mfa_enabled',
     outcome: 'success' | 'failure',
     metadata: Record<string, any> = {}
   ): Promise<void> {
@@ -377,7 +377,7 @@ export class AuditLoggingService {
     const complianceScore = this.calculateComplianceScore(auditLogs, reportType);
     
     // Identify violations and generate recommendations
-    const violations = this.identifyCompliance Violations(auditLogs, reportType);
+    const violations = this.identifyComplianceViolations(auditLogs, reportType);
     const recommendations = this.generateComplianceRecommendations(violations, reportType);
 
     const report: ComplianceReport = {
@@ -599,6 +599,115 @@ export class AuditLoggingService {
     return Math.min(score, 10);
   }
 
+  async logDataPrivacyEvent(
+    eventType: 'data_access' | 'data_export' | 'data_deletion' | 'consent_given' | 'consent_withdrawn',
+    userId: string,
+    details: {
+      dataType?: string;
+      requestId?: string;
+      legalBasis?: string;
+      metadata?: Record<string, any>;
+      consentId?: string;
+    },
+    metadata?: {
+      ipAddress?: string;
+      userAgent?: string;
+      pageUrl?: string;
+      campaignId?: string;
+      consentMethod?: 'explicit' | 'implied' | 'opt_in' | 'opt_out';
+      endpoint?: string;
+    },
+  ): Promise<void> {
+    const auditEntry: AuditLogEntry = {
+      eventId: this.generateEventId(),
+      timestamp: new Date(),
+      userId,
+      action: `${eventType}`,
+      resource: 'data_privacy',
+      outcome: 'success',
+      details: {
+        ...details,
+        ...metadata,
+      },
+      riskScore: this.calculateRiskScore('data_privacy', eventType),
+      compliance: {
+        gdpr: true,
+      },
+    };
+
+    await this.saveAuditLog(auditEntry);
+  }
+
+  async logSecurityEvent(
+    eventType: 'login_attempt' | 'password_change' | 'permission_change' | 'suspicious_activity' | 'security_breach',
+    userId: string,
+    details: {
+      success?: boolean;
+      reason?: string;
+      ipAddress?: string;
+      userAgent?: string;
+      metadata?: Record<string, any>;
+      incidentId?: string;
+      playbookId?: string;
+      period?: string;
+      severity?: string;
+      oldStatus?: string;
+      actionId?: string;
+      evidenceId?: string;
+      category?: string;
+      playbookName?: string;
+      totalIncidents?: number;
+      affectedSystems?: string[];
+      newStatus?: string;
+      actionType?: string;
+      evidenceType?: string;
+      stepsCount?: number;
+      actionsCreated?: number;
+      notes?: string;
+      action?: string;
+      location?: string;
+    },
+  ): Promise<void> {
+    const auditEntry: AuditLogEntry = {
+      eventId: this.generateEventId(),
+      timestamp: new Date(),
+      userId,
+      action: `${eventType}`,
+      resource: 'security',
+      outcome: details.success ? 'success' : 'failure',
+      details,
+      riskScore: this.calculateRiskScore('security', eventType),
+    };
+
+    await this.saveAuditLog(auditEntry);
+  }
+
+  async logComplianceEvent(
+    eventType: 'policy_violation' | 'audit_check' | 'compliance_review' | 'data_breach_notification',
+    userId: string,
+    details: {
+      policyId?: string;
+      violationType?: string;
+      severity?: 'low' | 'medium' | 'high' | 'critical';
+      metadata?: Record<string, any>;
+      reportPeriod?: string;
+      complianceScore?: number;
+    },
+  ): Promise<void> {
+    const auditEntry: AuditLogEntry = {
+      eventId: this.generateEventId(),
+      timestamp: new Date(),
+      userId,
+      action: `${eventType}`,
+      resource: 'compliance',
+      outcome: 'success',
+      details,
+      riskScore: this.calculateRiskScore('compliance', eventType),
+    };
+
+    await this.saveAuditLog(auditEntry);
+  }
+
   private isGdprRelevant(resource: string, action: string): boolean {
     const gdprResources = ['user', 'profile', 'contact', 'address', 'email'];
     const gdprActions = ['read', 'update', 'delete', 'export', 'anonymize'];
@@ -661,7 +770,7 @@ export class AuditLoggingService {
 
   private async saveComplianceReport(report: ComplianceReport): Promise<void> {
     // Save compliance report to database
-    this.logger.info(`Compliance report generated: ${report.reportId}`, {
+    this.logger.log(`Compliance report generated: ${report.reportId}`, {
       reportType: report.reportType,
       complianceScore: report.complianceScore,
       totalEvents: report.totalEvents

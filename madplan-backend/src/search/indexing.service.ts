@@ -234,13 +234,13 @@ export class IndexingService implements OnModuleInit {
 
         switch (entry.type) {
           case SearchItemType.BOARD:
-            exists = await this.boardModel.exists({ _id: entry.itemId });
+            exists = !!(await this.boardModel.exists({ _id: entry.itemId }));
             break;
           case SearchItemType.LIST:
-            exists = await this.listModel.exists({ _id: entry.itemId });
+            exists = !!(await this.listModel.exists({ _id: entry.itemId }));
             break;
           case SearchItemType.CARD:
-            exists = await this.cardModel.exists({ _id: entry.itemId });
+            exists = !!(await this.cardModel.exists({ _id: entry.itemId }));
             break;
         }
 

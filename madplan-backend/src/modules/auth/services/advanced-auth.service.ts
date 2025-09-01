@@ -7,7 +7,7 @@ import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import { v4 as uuidv4 } from 'uuid';
 import { Redis } from 'ioredis';
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
+// import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { EncryptionService } from '../../security/services/encryption.service';
 import { AuditLoggingService } from '../../security/services/audit-logging.service';
 
@@ -72,7 +72,8 @@ export class AdvancedAuthService {
     private readonly configService: ConfigService,
     private readonly encryptionService: EncryptionService,
     private readonly auditService: AuditLoggingService,
-    @InjectRedis() private readonly redis: Redis,
+    // @InjectRedis()
+    private readonly redis: Redis,
     @InjectModel('User') private readonly userModel: Model<any>,
     @InjectModel('UserSession') private readonly sessionModel: Model<any>,
     @InjectModel('SecurityEvent') private readonly securityEventModel: Model<any>,

@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { Role } from '../../auth/enums/role.enum';
-import { GetUser } from '../../auth/decorators/get-user.decorator';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/guards/roles.guard';
+import { Roles } from '../../../auth/decorators/roles.decorator';
+import { Role } from '../../../auth/enums/role.enum';
+import { GetUser } from '../../../auth/decorators/get-user.decorator';
 
 import { MetricsService, MetricQuery, DashboardMetrics } from '../services/metrics.service';
 import { TraceBusiness } from '../../../decorators/trace.decorator';

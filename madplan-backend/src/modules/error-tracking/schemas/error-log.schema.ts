@@ -76,14 +76,14 @@ export interface ErrorMetadata {
 @Schema({
   timestamps: true,
   collection: 'error_logs',
-  index: [
-    { severity: 1, timestamp: -1 },
-    { category: 1, timestamp: -1 },
-    { status: 1, timestamp: -1 },
-    { fingerprint: 1, timestamp: -1 },
-    { 'context.userId': 1, timestamp: -1 },
-    { resolved: 1, timestamp: -1 }
-  ]
+  // index: [
+  //   { severity: 1, timestamp: -1 },
+  //   { category: 1, timestamp: -1 },
+  //   { status: 1, timestamp: -1 },
+  //   { fingerprint: 1, timestamp: -1 },
+  //   { 'context.userId': 1, timestamp: -1 },
+  //   { resolved: 1, timestamp: -1 }
+  // ]
 })
 export class ErrorLog {
   @Prop({ required: true })

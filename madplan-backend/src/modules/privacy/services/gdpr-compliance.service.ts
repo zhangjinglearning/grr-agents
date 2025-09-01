@@ -142,14 +142,13 @@ export class GDPRComplianceService {
 
       // Log GDPR request submission
       await this.auditService.logDataPrivacyEvent(
+        requestType === 'access' ? 'data_access' : requestType === 'erasure' ? 'data_deletion' : 'data_export',
         userId,
-        userEmail,
-        'gdpr_request_submitted',
-        requestType,
-        'pending',
         {
+          dataType: 'gdpr_request',
           requestId: request.id,
-          priority: request.priority,
+        },
+        {
           ipAddress: metadata.ipAddress,
           userAgent: metadata.userAgent,
         }
@@ -220,16 +219,11 @@ export class GDPRComplianceService {
 
       // Log completion
       await this.auditService.logDataPrivacyEvent(
+        'data_access',
         request.userId,
-        request.userEmail,
-        'gdpr_access_completed',
-        'data_provided',
-        'success',
         {
+          dataType: 'user_data',
           requestId,
-          processedBy,
-          dataCategories: Object.keys(dataExport),
-          responseSize: JSON.stringify(dataExport).length,
         }
       );
 
@@ -288,17 +282,11 @@ export class GDPRComplianceService {
 
       // Log erasure completion
       await this.auditService.logDataPrivacyEvent(
+        'data_deletion',
         request.userId,
-        request.userEmail,
-        'gdpr_erasure_completed',
-        'data_erased',
-        'success',
         {
+          dataType: 'user_data',
           requestId,
-          processedBy,
-          erasedSystems: erasureResults.systemsProcessed,
-          retainedData: erasureResults.retainedData,
-          legalBasisForRetention: erasureResults.retentionReasons,
         }
       );
 
@@ -371,17 +359,11 @@ export class GDPRComplianceService {
 
       // Log portability completion
       await this.auditService.logDataPrivacyEvent(
+        'data_export',
         request.userId,
-        request.userEmail,
-        'gdpr_portability_completed',
-        'data_exported',
-        'success',
         {
+          dataType: 'user_data',
           requestId,
-          processedBy,
-          exportFormat: format,
-          exportSize: exportData.exportSize,
-          dataCategories: exportData.dataCategories,
         }
       );
 
@@ -430,15 +412,12 @@ export class GDPRComplianceService {
 
       // Log consent change
       await this.auditService.logDataPrivacyEvent(
+        consentStatus === 'granted' ? 'consent_given' : 'consent_withdrawn',
         userId,
-        userEmail,
-        'consent_recorded',
-        consentType,
-        consentStatus,
         {
-          consentId: consent.id,
-          consentVersion: consent.consentVersion,
-          source: consent.source,
+          dataType: 'consent',
+        },
+        {
           ipAddress: metadata.ipAddress,
           userAgent: metadata.userAgent,
         }
@@ -582,9 +561,8 @@ export class GDPRComplianceService {
 
       // Log report generation
       await this.auditService.logComplianceEvent(
-        'gdpr_report_generated',
+        'compliance_review',
         'compliance_monitoring',
-        'success',
         {
           reportPeriod: `${startDate.toISOString()} to ${endDate.toISOString()}`,
           complianceScore: report.complianceScore,

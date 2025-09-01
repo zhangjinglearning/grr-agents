@@ -957,7 +957,7 @@ export class AnalyticsService implements OnModuleInit {
         },
       },
       {
-        $sort: { usage: -1 },
+        $sort: { usage: -1 as -1 },
       },
       {
         $limit: 10,

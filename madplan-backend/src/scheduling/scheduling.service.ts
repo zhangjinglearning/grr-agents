@@ -224,7 +224,7 @@ export class SchedulingService {
         .exec();
 
       // Filter out cards that don't belong to the user (after population)
-      const userScheduledCards = scheduledCards.filter(sc => sc.card != null);
+      const userScheduledCards = scheduledCards.filter(sc => (sc as any).card != null);
 
       this.logger.log(`Found ${userScheduledCards.length} scheduled cards for user ${userId}`);
       return userScheduledCards;

@@ -276,11 +276,10 @@ export class IncidentResponseService {
 
       // Log incident creation
       await this.auditService.logSecurityEvent(
+        'security_breach',
         reportedBy,
-        'security_incident_created',
-        'incident_management',
-        'success',
         {
+          success: true,
           incidentId: incident.id,
           severity: incident.severity,
           category: incident.category,
@@ -358,11 +357,10 @@ export class IncidentResponseService {
 
       // Log status change
       await this.auditService.logSecurityEvent(
+        'suspicious_activity',
         updatedBy,
-        'incident_status_changed',
-        'incident_management',
-        'success',
         {
+          success: true,
           incidentId,
           oldStatus: incident.status,
           newStatus,
@@ -396,8 +394,8 @@ export class IncidentResponseService {
       await this.incidentModel.updateOne(
         { id: incidentId },
         {
-          $push: { [updateField]: action },
           $push: {
+            [updateField]: action,
             timeline: {
               timestamp: new Date(),
               action: 'response_action_added',
@@ -412,11 +410,10 @@ export class IncidentResponseService {
 
       // Log action addition
       await this.auditService.logSecurityEvent(
+        'suspicious_activity',
         addedBy,
-        'incident_action_added',
-        'incident_management',
-        'success',
         {
+          success: true,
           incidentId,
           actionId: action.id,
           actionType,
@@ -478,11 +475,10 @@ export class IncidentResponseService {
 
       // Log evidence collection
       await this.auditService.logSecurityEvent(
+        'suspicious_activity',
         collectedBy,
-        'incident_evidence_collected',
-        'evidence_management',
-        'success',
         {
+          success: true,
           incidentId,
           evidenceId: evidence.id,
           evidenceType: evidence.type,
@@ -517,11 +513,10 @@ export class IncidentResponseService {
 
       // Log playbook creation
       await this.auditService.logSecurityEvent(
+        'suspicious_activity',
         createdBy,
-        'incident_playbook_created',
-        'incident_management',
-        'success',
         {
+          success: true,
           playbookId: playbook.id,
           category: playbook.category,
           stepsCount: playbook.responseSteps.length,
@@ -597,11 +592,10 @@ export class IncidentResponseService {
 
       // Log playbook execution
       await this.auditService.logSecurityEvent(
+        'suspicious_activity',
         executedBy,
-        'incident_playbook_executed',
-        'incident_management',
-        'success',
         {
+          success: true,
           incidentId,
           playbookId,
           playbookName: playbook.name,
@@ -661,11 +655,10 @@ export class IncidentResponseService {
 
       // Log metrics generation
       await this.auditService.logSecurityEvent(
+        'suspicious_activity',
         'system',
-        'incident_metrics_generated',
-        'reporting',
-        'success',
         {
+          success: true,
           period: `${startDate.toISOString()} to ${endDate.toISOString()}`,
           totalIncidents: metrics.totalIncidents,
         }

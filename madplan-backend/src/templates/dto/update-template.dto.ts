@@ -6,7 +6,7 @@ import { CreateTemplateInput, CreateTemplateContentInput } from './create-templa
 export class UpdateTemplateContentInput extends PartialType(CreateTemplateContentInput) {}
 
 @InputType()
-export class UpdateTemplateInput extends PartialType(CreateTemplateInput) {
+export class UpdateTemplateInput {
   @Field()
   @IsString()
   @IsNotEmpty()

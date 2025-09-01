@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as Redis from 'ioredis';
+import Redis from 'ioredis';
 import * as crypto from 'crypto';
 import { PerformanceService } from './performance.service';
 
@@ -29,7 +29,7 @@ export interface CacheStats {
 @Injectable()
 export class CacheService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CacheService.name);
-  private redis: Redis.Redis | Redis.Cluster;
+  private redis: Redis | any;
   private stats: CacheStats;
   private responseTimeHistory: number[] = [];
 

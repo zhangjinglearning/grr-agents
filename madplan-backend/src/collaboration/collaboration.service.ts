@@ -24,7 +24,7 @@ export class CollaborationService {
       throw new NotFoundException('Board not found');
     }
 
-    if (board.createdBy !== userId) {
+    if ((board as any).createdBy !== userId) {
       throw new ForbiddenException('Only board owner can share boards');
     }
 
@@ -129,7 +129,7 @@ export class CollaborationService {
     }
 
     const board = await this.boardModel.findById(share.boardId).exec();
-    if (!board || board.createdBy !== userId) {
+    if (!board || (board as any).createdBy !== userId) {
       throw new ForbiddenException('Only board owner can update shares');
     }
 
@@ -137,7 +137,7 @@ export class CollaborationService {
       share.permission = input.permission;
     }
     if (input.status !== undefined) {
-      share.status = input.status;
+      share.status = input.status as any;
     }
     if (input.expiresAt !== undefined) {
       share.expiresAt = input.expiresAt;
@@ -175,7 +175,7 @@ export class CollaborationService {
     }
 
     const board = await this.boardModel.findById(share.boardId).exec();
-    if (!board || board.createdBy !== userId) {
+    if (!board || (board as any).createdBy !== userId) {
       throw new ForbiddenException('Only board owner can revoke shares');
     }
 
@@ -244,7 +244,7 @@ export class CollaborationService {
       return null;
     }
 
-    if (board.createdBy === userId) {
+    if ((board as any).createdBy === userId) {
       return SharePermission.ADMIN;
     }
 
@@ -322,7 +322,7 @@ export class CollaborationService {
 
   async generateShareLink(boardId: string, userId: string, permission: SharePermission, expiresAt?: Date): Promise<string> {
     const board = await this.boardModel.findById(boardId).exec();
-    if (!board || board.createdBy !== userId) {
+    if (!board || (board as any).createdBy !== userId) {
       throw new ForbiddenException('Only board owner can generate share links');
     }
 

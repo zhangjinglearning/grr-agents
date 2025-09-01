@@ -17,10 +17,10 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { Role } from '../../auth/enums/role.enum';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/guards/roles.guard';
+import { Roles } from '../../../auth/decorators/roles.decorator';
+import { Role } from '../../../auth/enums/role.enum';
 import { GDPRComplianceService, GDPRRequest, ConsentRecord } from '../services/gdpr-compliance.service';
 import { AuditLoggingService } from '../../security/services/audit-logging.service';
 
@@ -91,13 +91,13 @@ export class PrivacyController {
 
       // Log the request submission for audit
       await this.auditService.logDataPrivacyEvent(
+        'data_access',
         req.user.id,
-        req.user.email,
-        'gdpr_request_api_call',
-        requestType,
-        'submitted',
         {
           requestId: gdprRequest.id,
+          dataType: requestType,
+        },
+        {
           endpoint: '/privacy/gdpr-request',
           ipAddress: req.ip,
         }
@@ -137,13 +137,13 @@ export class PrivacyController {
       // For now, returning a basic response structure
       
       await this.auditService.logDataPrivacyEvent(
+        'data_access',
         req.user.id,
-        req.user.email,
-        'gdpr_status_check',
-        'request_status',
-        'viewed',
         {
           requestId,
+          dataType: 'gdpr_request',
+        },
+        {
           endpoint: `/privacy/gdpr-request/${requestId}`,
           ipAddress: req.ip,
         }
@@ -203,20 +203,23 @@ export class PrivacyController {
           thirdPartySharing: this.hasThirdPartySharing(consentType),
           automatedDecisionMaking: this.hasAutomatedDecisionMaking(consentType),
         },
-        metadata
+        {
+          ...metadata,
+          consentMethod: metadata.consentMethod as 'explicit' | 'implied' | 'opt_in' | 'opt_out'
+        }
       );
 
       await this.auditService.logDataPrivacyEvent(
+        consentStatus === 'granted' ? 'consent_given' : 'consent_withdrawn',
         req.user.id,
-        req.user.email,
-        'consent_updated',
-        consentType,
-        consentStatus,
         {
           consentId: consentRecord.id,
-          source,
+          dataType: consentType,
+        },
+        {
           endpoint: '/privacy/consent',
           ipAddress: req.ip,
+          consentMethod: 'explicit' as const,
         }
       );
 
@@ -248,11 +251,11 @@ export class PrivacyController {
       const consentStatus = await this.gdprService.getUserConsentStatus(req.user.id);
 
       await this.auditService.logDataPrivacyEvent(
+        'data_access',
         req.user.id,
-        req.user.email,
-        'consent_status_viewed',
-        'consent_preferences',
-        'viewed',
+        {
+          dataType: 'consent_status',
+        },
         {
           endpoint: '/privacy/consent',
           ipAddress: req.ip,
@@ -296,13 +299,13 @@ export class PrivacyController {
       // Implementation would validate export ID and generate secure download URL
       
       await this.auditService.logDataPrivacyEvent(
+        'data_export',
         req.user.id,
-        req.user.email,
-        'data_export_downloaded',
-        'data_portability',
-        'success',
         {
-          exportId,
+          dataType: 'user_data',
+          requestId: exportId,
+        },
+        {
           endpoint: `/privacy/data-export/${exportId}`,
           ipAddress: req.ip,
         }
@@ -431,15 +434,13 @@ export class PrivacyController {
       }
 
       await this.auditService.logDataPrivacyEvent(
+        'data_access',
         req.user.id,
-        req.user.email,
-        'gdpr_request_processed',
-        'admin_action',
-        'success',
         {
+          dataType: 'gdpr_request',
           requestId,
-          action,
-          processedBy: req.user.email,
+        },
+        {
           endpoint: `/privacy/admin/gdpr-request/${requestId}/process`,
           ipAddress: req.ip,
         }
@@ -477,13 +478,12 @@ export class PrivacyController {
       const report = await this.gdprService.generateComplianceReport(start, end);
 
       await this.auditService.logDataPrivacyEvent(
+        'data_access',
         req.user.id,
-        req.user.email,
-        'compliance_report_generated',
-        'admin_action',
-        'success',
         {
-          reportPeriod: `${start.toISOString()} to ${end.toISOString()}`,
+          dataType: 'compliance_report',
+        },
+        {
           endpoint: '/privacy/admin/compliance-report',
           ipAddress: req.ip,
         }

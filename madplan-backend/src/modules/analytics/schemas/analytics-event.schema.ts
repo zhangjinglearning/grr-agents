@@ -66,13 +66,6 @@ export enum EventAction {
 @Schema({
   timestamps: true,
   collection: 'analytics_events',
-  index: [
-    { eventCategory: 1, timestamp: -1 },
-    { userId: 1, timestamp: -1 },
-    { eventAction: 1, timestamp: -1 },
-    { sessionId: 1, timestamp: -1 },
-    { 'properties.boardId': 1, timestamp: -1 }
-  ]
 })
 export class AnalyticsEvent {
   @Prop({ required: true, enum: EventCategory, index: true })
